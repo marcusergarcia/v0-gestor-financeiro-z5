@@ -1,132 +1,345 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
-import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useState, useEffect } from "react"
+import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Save, FileText, Package, Camera, PenTool, ArrowLeft, Plus, Trash2, FileSignature } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
-import Link from "next/link"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { toast } from "@/hooks/use-toast"
+import type { Cliente } from "@/components/cliente-combobox"
+import { EquipamentoCombobox } from "@/components/equipamento-combobox"
 import { CameraCapture } from "@/components/ordem-servico/camera-capture"
 import { SignaturePad } from "@/components/ordem-servico/signature-pad"
-import { toast } from "@/hooks/use-toast"
-import type { OrdemServico, OrdemServicoItem, OrdemServicoFoto, OrdemServicoAssinatura } from "@/types/ordem-servico"
+import { getTipoServicoLabel } from "@/types/ordem-servico"
+import {
+  ArrowLeft,
+  Save,
+  FileText,
+  User,
+  Clock,
+  Package,
+  Trash2,
+  CheckCircle,
+  AlertCircle,
+  PlayCircle,
+  Camera,
+  PenTool,
+  ClipboardList,
+  AlertTriangle,
+  MapPin,
+} from "lucide-react"
 
-interface PageProps {
-  params: Promise<{ id: string }>
+interface Equipamento {
+  id: number
+  nome: string
+  categoria: string
+  valor_hora: number
+  ativo: boolean
 }
 
-export default function EditarOrdemServicoPage({ params }: PageProps) {
-  const resolvedParams = use(params)
+interface OrdemServicoItem {
+  id: number
+  equipamento_id: number
+  equipamento_nome: string
+  observacoes: string
+  situacao: string
+  equipamento_nome_atual?: string
+  categoria?: string
+  valor_hora?: number
+  ativo?: boolean
+}
+
+interface Foto {
+  id?: number
+  nome_arquivo: string
+  caminho_arquivo: string
+  tipo_foto: "antes" | "durante" | "depois"
+  descricao?: string
+  created_at?: string
+  preview?: string
+  caminho?: string
+}
+
+interface Assinatura {
+  id?: number
+  tipo_assinatura: "tecnico" | "responsavel"
+  assinatura_base64: string
+  nome_assinante: string
+  data_assinatura?: string
+  tipo?: string
+  nome?: string
+  caminho?: string
+}
+
+interface OrdemServico {
+  id: number
+  numero: string
+  cliente_id: number
+  contrato_id?: number
+  contrato_numero?: string
+  tecnico_id?: number
+  tecnico_name: string
+  tecnico_email: string
+  solicitado_por: string
+  data_atual: string
+  data_agendamento?: string
+  data_execucao?: string
+  horario_entrada: string
+  horario_saida: string
+  tipo_servico: string
+  relatorio_visita: string
+  descricao_defeito: string
+  servico_realizado: string
+  observacoes: string
+  responsavel: string
+  nome_responsavel: string
+  situacao: string
+  cliente: Cliente
+  itens: OrdemServicoItem[]
+}
+
+const TEXTO_SERVICO_PREVENTIVA = `1. Limpeza e Lubrificação dos portões de pedestre com verificação das fechaduras e/ou Eletroímãs.
+2. Limpeza e Lubrificação dos portões de veículos com teste de fricção.
+3. Teste dos sensores de anti-esmagamento.
+4. Verificação dos cabos de aço ou cremalheiras.`
+
+export default function EditarOrdemServicoPage() {
   const router = useRouter()
+  const params = useParams()
+  const ordemId = params.id as string
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [ordemServico, setOrdemServico] = useState<OrdemServico | null>(null)
-  const [clientes, setClientes] = useState<any[]>([])
-  const [tecnicos, setTecnicos] = useState<any[]>([])
-  const [itens, setItens] = useState<OrdemServicoItem[]>([])
-  const [fotos, setFotos] = useState<OrdemServicoFoto[]>([])
-  const [assinaturas, setAssinaturas] = useState<OrdemServicoAssinatura[]>([])
-  const [activeTab, setActiveTab] = useState("dados")
+  const [ordem, setOrdem] = useState<OrdemServico | null>(null)
+  const [equipamentos, setEquipamentos] = useState<Equipamento[]>([])
+  const [activeTab, setActiveTab] = useState("info")
 
-  useEffect(() => {
-    carregarDados()
-  }, [resolvedParams.id])
+  // Estados do formulário
+  const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
+  const [contratoNumero, setContratoNumero] = useState("")
+  const [tecnicoName, setTecnicoName] = useState("")
+  const [tecnicoEmail, setTecnicoEmail] = useState("")
+  const [dataExecucao, setDataExecucao] = useState("")
+  const [horarioEntrada, setHorarioEntrada] = useState("")
+  const [horarioSaida, setHorarioSaida] = useState("")
+  const [relatorioVisita, setRelatorioVisita] = useState("")
+  const [servicoRealizado, setServicoRealizado] = useState("")
+  const [observacoes, setObservacoes] = useState("")
+  const [responsavel, setResponsavel] = useState("")
+  const [nomeResponsavel, setNomeResponsavel] = useState("")
+  const [situacao, setSituacao] = useState("em_andamento")
 
-  const carregarDados = async () => {
-    try {
-      setLoading(true)
+  // Estados dos equipamentos
+  const [itensEquipamentos, setItensEquipamentos] = useState<OrdemServicoItem[]>([])
+  const [novoEquipamentoId, setNovoEquipamentoId] = useState<number | null>(null)
 
-      // Carregar ordem de serviço
-      const osResponse = await fetch(`/api/ordens-servico/${resolvedParams.id}`)
-      const osData = await osResponse.json()
+  // Estados das fotos e assinaturas
+  const [fotos, setFotos] = useState<Foto[]>([])
+  const [assinaturas, setAssinaturas] = useState<Assinatura[]>([])
 
-      if (osData.success) {
-        setOrdemServico(osData.data)
-      }
+  // Função para formatar endereço completo
+  const getEnderecoCompleto = (cliente: Cliente | null): string => {
+    if (!cliente) return "Endereço não disponível"
 
-      // Carregar clientes
-      const clientesResponse = await fetch("/api/clientes")
-      const clientesData = await clientesResponse.json()
-      if (clientesData.success) {
-        setClientes(clientesData.data)
-      }
-
-      // Carregar técnicos
-      const tecnicosResponse = await fetch("/api/usuarios")
-      const tecnicosData = await tecnicosResponse.json()
-      if (tecnicosData.success) {
-        setTecnicos(tecnicosData.data.filter((u: any) => u.tipo === "tecnico"))
-      }
-
-      // Carregar itens
-      const itensResponse = await fetch(`/api/ordens-servico/${resolvedParams.id}/itens`)
-      const itensData = await itensResponse.json()
-      if (itensData.success) {
-        setItens(itensData.data)
-      }
-
-      // Carregar fotos
-      const fotosResponse = await fetch(`/api/ordens-servico/${resolvedParams.id}/fotos`)
-      const fotosData = await fotosResponse.json()
-      if (fotosData.success) {
-        setFotos(fotosData.data)
-      }
-
-      // Carregar assinaturas
-      const assinaturasResponse = await fetch(`/api/ordens-servico/${resolvedParams.id}/assinaturas`)
-      const assinaturasData = await assinaturasResponse.json()
-      if (assinaturasData.success) {
-        setAssinaturas(assinaturasData.data)
-      }
-    } catch (error) {
-      console.error("Erro ao carregar dados:", error)
-      toast({
-        title: "Erro",
-        description: "Erro ao carregar dados da ordem de serviço",
-        variant: "destructive",
-      })
-    } finally {
-      setLoading(false)
+    const partes = []
+    if (cliente.endereco) partes.push(cliente.endereco)
+    if (cliente.bairro) partes.push(cliente.bairro)
+    if (cliente.cidade && cliente.estado) {
+      partes.push(`${cliente.cidade}/${cliente.estado}`)
+    } else if (cliente.cidade) {
+      partes.push(cliente.cidade)
+    } else if (cliente.estado) {
+      partes.push(cliente.estado)
     }
+    if (cliente.cep) partes.push(`CEP: ${cliente.cep}`)
+
+    return partes.length > 0 ? partes.join(" - ") : "Endereço não disponível"
   }
 
-  const handleSave = async () => {
-    if (!ordemServico) return
+  // Carregar dados iniciais
+  useEffect(() => {
+    const carregarDados = async () => {
+      try {
+        setLoading(true)
+        console.log(`[Frontend] Carregando dados da ordem ${ordemId}`)
+
+        // Carregar ordem de serviço
+        const ordemResponse = await fetch(`/api/ordens-servico/${ordemId}`)
+        if (!ordemResponse.ok) {
+          throw new Error("Erro ao carregar ordem de serviço")
+        }
+        const ordemData = await ordemResponse.json()
+
+        if (!ordemData.success) {
+          throw new Error(ordemData.error || "Erro ao carregar ordem de serviço")
+        }
+
+        const ordemServico = ordemData.data
+        console.log("[Frontend] Ordem de serviço carregada:", ordemServico)
+        setOrdem(ordemServico)
+
+        // Buscar dados completos do cliente
+        if (ordemServico.cliente_id) {
+          console.log(`[Frontend] Buscando dados do cliente ${ordemServico.cliente_id}`)
+          const clienteResponse = await fetch(`/api/clientes/${ordemServico.cliente_id}`)
+          if (clienteResponse.ok) {
+            const clienteData = await clienteResponse.json()
+            if (clienteData.success && clienteData.data) {
+              console.log("[Frontend] Dados do cliente carregados:", clienteData.data)
+              setClienteSelecionado(clienteData.data)
+            }
+          } else {
+            console.warn("[Frontend] Erro ao buscar dados do cliente")
+            // Se falhar, usar dados do cliente da ordem
+            if (ordemServico.cliente) {
+              setClienteSelecionado(ordemServico.cliente)
+            }
+          }
+        } else if (ordemServico.cliente) {
+          setClienteSelecionado(ordemServico.cliente)
+        }
+
+        setContratoNumero(ordemServico.contrato_numero || "Cliente sem contrato")
+        setTecnicoName(ordemServico.tecnico_name || "")
+        setTecnicoEmail(ordemServico.tecnico_email || "")
+
+        if (ordemServico.data_execucao) {
+          const dataFormatada = ordemServico.data_execucao.split("T")[0]
+          setDataExecucao(dataFormatada)
+        }
+
+        setHorarioEntrada(ordemServico.horario_entrada || "")
+        setHorarioSaida(ordemServico.horario_saida || "")
+        setRelatorioVisita(ordemServico.relatorio_visita || "")
+        setServicoRealizado(ordemServico.servico_realizado || "")
+        setObservacoes(ordemServico.observacoes || "")
+        setResponsavel(ordemServico.responsavel || "")
+        setNomeResponsavel(ordemServico.nome_responsavel || "")
+
+        // Definir situação: se for "aberta", mudar para "em_andamento" por padrão na edição
+        const situacaoAtual = ordemServico.situacao || "aberta"
+        if (situacaoAtual === "aberta") {
+          setSituacao("em_andamento")
+        } else {
+          setSituacao(situacaoAtual)
+        }
+
+        setItensEquipamentos(ordemServico.itens || [])
+
+        // Carregar fotos
+        const fotosResponse = await fetch(`/api/ordens-servico/${ordemId}/fotos`)
+        if (fotosResponse.ok) {
+          const fotosData = await fotosResponse.json()
+          if (fotosData.success) {
+            setFotos(fotosData.data)
+          }
+        }
+
+        // Carregar assinaturas
+        const assinaturasResponse = await fetch(`/api/ordens-servico/${ordemId}/assinaturas`)
+        if (assinaturasResponse.ok) {
+          const assinaturasData = await assinaturasResponse.json()
+          if (assinaturasData.success) {
+            setAssinaturas(assinaturasData.data)
+          }
+        }
+
+        // Carregar equipamentos
+        const equipamentosResponse = await fetch("/api/equipamentos")
+        if (equipamentosResponse.ok) {
+          const equipamentosData = await equipamentosResponse.json()
+          if (equipamentosData.success) {
+            setEquipamentos(equipamentosData.data)
+          }
+        }
+
+        if (ordemServico.tipo_servico === "preventiva" && !ordemServico.relatorio_visita) {
+          setRelatorioVisita(TEXTO_SERVICO_PREVENTIVA)
+        }
+
+        console.log("[Frontend] Carregamento completo!")
+      } catch (error) {
+        console.error("[Frontend] Erro ao carregar dados:", error)
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar dados da ordem de serviço",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (ordemId) {
+      carregarDados()
+    }
+  }, [ordemId])
+
+  const handleSalvarOrdem = async (comoRascunho = false) => {
+    if (!clienteSelecionado || !tecnicoName) {
+      toast({
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios",
+        variant: "destructive",
+      })
+      return
+    }
 
     try {
       setSaving(true)
 
-      const response = await fetch(`/api/ordens-servico/${resolvedParams.id}`, {
+      const ordemData = {
+        cliente_id: clienteSelecionado.id,
+        contrato_id: ordem?.contrato_id || null,
+        contrato_numero: contratoNumero !== "Cliente sem contrato" ? contratoNumero : null,
+        tecnico_name: tecnicoName,
+        tecnico_email: tecnicoEmail,
+        data_execucao: dataExecucao || null,
+        horario_entrada: horarioEntrada || null,
+        horario_saida: horarioSaida || null,
+        relatorio_visita: relatorioVisita,
+        servico_realizado: servicoRealizado,
+        observacoes: observacoes,
+        responsavel: responsavel,
+        nome_responsavel: nomeResponsavel,
+        situacao: comoRascunho ? "aberta" : situacao,
+      }
+
+      console.log("[Frontend] Salvando ordem:", ordemData)
+
+      const response = await fetch(`/api/ordens-servico/${ordemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(ordemServico),
+        body: JSON.stringify(ordemData),
       })
 
       const data = await response.json()
 
-      if (data.success) {
-        toast({
-          title: "Sucesso",
-          description: "Ordem de serviço atualizada com sucesso",
-        })
-        router.push(`/ordem-servico/${resolvedParams.id}`)
-      } else {
-        throw new Error(data.error || "Erro ao salvar")
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Erro ao atualizar ordem de serviço")
       }
+
+      toast({
+        title: "Sucesso",
+        description: comoRascunho
+          ? "Alterações salvas! A ordem continua aberta."
+          : `Ordem de serviço atualizada! Status: ${getSituacaoLabel(situacao)}`,
+      })
+
+      router.push("/ordem-servico")
     } catch (error) {
-      console.error("Erro ao salvar:", error)
+      console.error("[Frontend] Erro ao salvar:", error)
       toast({
         title: "Erro",
-        description: "Erro ao salvar ordem de serviço",
+        description: error instanceof Error ? error.message : "Erro ao atualizar ordem de serviço",
         variant: "destructive",
       })
     } finally {
@@ -134,486 +347,687 @@ export default function EditarOrdemServicoPage({ params }: PageProps) {
     }
   }
 
-  const handleAddItem = async () => {
-    const novoItem: Partial<OrdemServicoItem> = {
-      ordem_servico_id: Number(resolvedParams.id),
-      descricao: "",
-      quantidade: 1,
-      valor_unitario: 0,
-      valor_total: 0,
+  const handleAdicionarEquipamento = async () => {
+    if (!novoEquipamentoId) {
+      toast({
+        title: "Erro",
+        description: "Selecione um equipamento",
+        variant: "destructive",
+      })
+      return
     }
 
     try {
-      const response = await fetch(`/api/ordens-servico/${resolvedParams.id}/itens`, {
+      const equipamentoSelecionado = equipamentos.find((e) => e.id === novoEquipamentoId)
+      if (!equipamentoSelecionado) return
+
+      const itemData = {
+        equipamento_id: novoEquipamentoId,
+        equipamento_nome: equipamentoSelecionado.nome,
+        quantidade: 1,
+        observacoes: "",
+        situacao: "pendente",
+      }
+
+      const response = await fetch(`/api/ordens-servico/${ordemId}/itens`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(novoItem),
+        body: JSON.stringify(itemData),
       })
 
       const data = await response.json()
 
-      if (data.success) {
-        setItens([...itens, data.data])
-        toast({
-          title: "Sucesso",
-          description: "Item adicionado com sucesso",
-        })
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Erro ao adicionar equipamento")
       }
+
+      const novoItem: OrdemServicoItem = {
+        id: data.data.id,
+        equipamento_id: novoEquipamentoId,
+        equipamento_nome: equipamentoSelecionado.nome,
+        observacoes: "",
+        situacao: "pendente",
+        equipamento_nome_atual: equipamentoSelecionado.nome,
+        categoria: equipamentoSelecionado.categoria,
+        valor_hora: equipamentoSelecionado.valor_hora,
+        ativo: equipamentoSelecionado.ativo,
+      }
+
+      setItensEquipamentos((prev) => [...prev, novoItem])
+      setNovoEquipamentoId(null)
+
+      toast({
+        title: "Sucesso",
+        description: "Equipamento adicionado com sucesso!",
+      })
     } catch (error) {
-      console.error("Erro ao adicionar item:", error)
       toast({
         title: "Erro",
-        description: "Erro ao adicionar item",
+        description: error instanceof Error ? error.message : "Erro ao adicionar equipamento",
         variant: "destructive",
       })
     }
   }
 
-  const handleDeleteItem = async (itemId: number) => {
-    if (!confirm("Tem certeza que deseja excluir este item?")) return
-
+  const handleRemoverEquipamento = async (itemId: number) => {
     try {
-      const response = await fetch(`/api/ordens-servico/${resolvedParams.id}/itens/${itemId}`, {
+      const response = await fetch(`/api/ordens-servico/${ordemId}/itens/${itemId}`, {
         method: "DELETE",
       })
 
-      if (response.ok) {
-        setItens(itens.filter((item) => item.id !== itemId))
-        toast({
-          title: "Sucesso",
-          description: "Item excluído com sucesso",
-        })
-      }
-    } catch (error) {
-      console.error("Erro ao excluir item:", error)
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir item",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const handleAddFoto = async (fotoBase64: string) => {
-    try {
-      const response = await fetch(`/api/ordens-servico/${resolvedParams.id}/fotos`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ordem_servico_id: Number(resolvedParams.id),
-          caminho: fotoBase64,
-          descricao: "",
-        }),
-      })
-
       const data = await response.json()
 
-      if (data.success) {
-        setFotos([...fotos, data.data])
-        toast({
-          title: "Sucesso",
-          description: "Foto adicionada com sucesso",
-        })
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || "Erro ao remover equipamento")
       }
+
+      setItensEquipamentos((prev) => prev.filter((item) => item.id !== itemId))
+
+      toast({
+        title: "Sucesso",
+        description: "Equipamento removido com sucesso!",
+      })
     } catch (error) {
-      console.error("Erro ao adicionar foto:", error)
       toast({
         title: "Erro",
-        description: "Erro ao adicionar foto",
+        description: error instanceof Error ? error.message : "Erro ao remover equipamento",
         variant: "destructive",
       })
     }
   }
 
-  const handleDeleteFoto = async (fotoId: number) => {
-    if (!confirm("Tem certeza que deseja excluir esta foto?")) return
-
-    try {
-      const response = await fetch(`/api/ordens-servico/${resolvedParams.id}/fotos/${fotoId}`, {
-        method: "DELETE",
-      })
-
-      if (response.ok) {
-        setFotos(fotos.filter((foto) => foto.id !== fotoId))
-        toast({
-          title: "Sucesso",
-          description: "Foto excluída com sucesso",
-        })
-      }
-    } catch (error) {
-      console.error("Erro ao excluir foto:", error)
-      toast({
-        title: "Erro",
-        description: "Erro ao excluir foto",
-        variant: "destructive",
-      })
+  const getSituacaoColor = (situacao: string) => {
+    switch (situacao) {
+      case "aberta":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      case "em_andamento":
+        return "bg-blue-100 text-blue-800 border-blue-200"
+      case "concluida":
+        return "bg-green-100 text-green-800 border-green-200"
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200"
     }
   }
 
-  const handleAddAssinatura = async (tipo: "tecnico" | "cliente", assinaturaBase64: string) => {
-    try {
-      const response = await fetch(`/api/ordens-servico/${resolvedParams.id}/assinaturas`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ordem_servico_id: Number(resolvedParams.id),
-          tipo,
-          assinatura: assinaturaBase64,
-        }),
-      })
+  const getSituacaoLabel = (situacao: string) => {
+    switch (situacao) {
+      case "aberta":
+        return "ABERTA"
+      case "em_andamento":
+        return "EM ANDAMENTO"
+      case "concluida":
+        return "CONCLUÍDA"
+      default:
+        return "ABERTA"
+    }
+  }
 
-      const data = await response.json()
-
-      if (data.success) {
-        setAssinaturas([...assinaturas, data.data])
-        toast({
-          title: "Sucesso",
-          description: "Assinatura adicionada com sucesso",
-        })
-      }
-    } catch (error) {
-      console.error("Erro ao adicionar assinatura:", error)
-      toast({
-        title: "Erro",
-        description: "Erro ao adicionar assinatura",
-        variant: "destructive",
-      })
+  const getSituacaoIcon = (situacao: string) => {
+    switch (situacao) {
+      case "aberta":
+        return <Clock className="h-4 w-4" />
+      case "em_andamento":
+        return <PlayCircle className="h-4 w-4" />
+      case "concluida":
+        return <CheckCircle className="h-4 w-4" />
+      default:
+        return <AlertCircle className="h-4 w-4" />
     }
   }
 
   if (loading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-96 w-full" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Carregando ordem de serviço...</p>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
 
-  if (!ordemServico) {
+  if (!ordem) {
     return (
-      <div className="flex-1 p-4 md:p-8 pt-6">
-        <div className="text-center py-8">
-          <p className="text-gray-500">Ordem de serviço não encontrada</p>
-          <Link href="/ordem-servico">
-            <Button className="mt-4">Voltar para listagem</Button>
-          </Link>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+        <div className="container mx-auto p-6">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-600 mb-4">Ordem de serviço não encontrada</h1>
+            <Button onClick={() => router.push("/ordem-servico")}>Voltar para lista</Button>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 pb-24 md:pb-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/ordem-servico">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 pb-24 md:pb-6">
+      <div className="container mx-auto p-4 md:p-6 space-y-4 md:space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Editar Ordem de Serviço</h2>
-            <p className="text-sm text-muted-foreground">OS #{ordemServico.numero}</p>
+            <h1 className="text-xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Executar Ordem de Serviço
+            </h1>
+            <p className="text-gray-600 mt-1 text-xs md:text-base">Complete as informações de execução do serviço</p>
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <FileText className="h-3 w-3 md:h-4 md:w-4 text-gray-500" />
+              <Badge variant="outline" className="font-mono text-[10px] md:text-sm">
+                Número: {ordem.numero}
+              </Badge>
+              <Badge variant="outline" className={`text-[10px] md:text-sm ${getSituacaoColor(situacao)}`}>
+                {getSituacaoIcon(situacao)}
+                <span className="ml-1">{getSituacaoLabel(situacao)}</span>
+              </Badge>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => router.back()}
+              className="bg-white/80 backdrop-blur-sm flex-1 md:flex-none"
+              size="sm"
+            >
+              <ArrowLeft className="h-4 w-4 md:mr-2" />
+              <span className="md:inline">Voltar</span>
+            </Button>
           </div>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 h-auto md:h-10">
-          <TabsTrigger value="dados" className="text-xs md:text-sm flex flex-col md:flex-row items-center gap-1 py-2">
-            <FileText className="h-4 w-4" />
-            <span className="hidden md:inline">Dados</span>
-          </TabsTrigger>
-          <TabsTrigger value="itens" className="text-xs md:text-sm flex flex-col md:flex-row items-center gap-1 py-2">
-            <Package className="h-4 w-4" />
-            <span className="hidden md:inline">Itens</span>
-          </TabsTrigger>
-          <TabsTrigger value="fotos" className="text-xs md:text-sm flex flex-col md:flex-row items-center gap-1 py-2">
-            <Camera className="h-4 w-4" />
-            <span className="hidden md:inline">Fotos</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="assinaturas"
-            className="text-xs md:text-sm flex flex-col md:flex-row items-center gap-1 py-2"
-          >
-            <PenTool className="h-4 w-4" />
-            <span className="hidden md:inline">Assinaturas</span>
-          </TabsTrigger>
-          <TabsTrigger
-            value="observacoes"
-            className="text-xs md:text-sm flex flex-col md:flex-row items-center gap-1 py-2"
-          >
-            <FileSignature className="h-4 w-4" />
-            <span className="hidden md:inline">Obs</span>
-          </TabsTrigger>
-        </TabsList>
+        {/* Tabs Navigation */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-5 gap-1 h-auto p-1">
+            <TabsTrigger value="info" className="flex flex-col items-center gap-1 py-2 px-1 text-[10px] md:text-sm">
+              <User className="h-3 w-3 md:h-4 md:w-4" />
+              <span>Info</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="equipamentos"
+              className="flex flex-col items-center gap-1 py-2 px-1 text-[10px] md:text-sm"
+            >
+              <Package className="h-3 w-3 md:h-4 md:w-4" />
+              <span>Equip.</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="relatorios"
+              className="flex flex-col items-center gap-1 py-2 px-1 text-[10px] md:text-sm"
+            >
+              <ClipboardList className="h-3 w-3 md:h-4 md:w-4" />
+              <span>Relatório</span>
+            </TabsTrigger>
+            <TabsTrigger value="fotos" className="flex flex-col items-center gap-1 py-2 px-1 text-[10px] md:text-sm">
+              <Camera className="h-3 w-3 md:h-4 md:w-4" />
+              <span>Fotos</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="assinaturas"
+              className="flex flex-col items-center gap-1 py-2 px-1 text-[10px] md:text-sm"
+            >
+              <PenTool className="h-3 w-3 md:h-4 md:w-4" />
+              <span>Assin.</span>
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Tab: Dados */}
-        <TabsContent value="dados" className="space-y-4">
-          <Card>
-            <CardHeader className="p-4 md:p-6">
-              <CardTitle className="text-lg">Informações Gerais</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 p-4 md:p-6">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="cliente_id" className="text-sm">
-                    Cliente *
-                  </Label>
-                  <Select
-                    value={ordemServico.cliente_id?.toString()}
-                    onValueChange={(value) => setOrdemServico({ ...ordemServico, cliente_id: Number(value) })}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Selecione o cliente" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {clientes.map((cliente) => (
-                        <SelectItem key={cliente.id} value={cliente.id.toString()}>
-                          {cliente.nome}
+          {/* Tab 1: Informações */}
+          <TabsContent value="info" className="space-y-4">
+            {/* Informações Básicas */}
+            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 text-white rounded-t-lg p-3 md:p-6">
+                <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
+                  <FileText className="h-4 w-4 md:h-5 md:w-5" />
+                  Informações da Ordem
+                </CardTitle>
+                <CardDescription className="text-gray-100 text-xs md:text-sm">
+                  Dados básicos (não editáveis)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-3 md:p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-xs md:text-sm">
+                  <div>
+                    <Label className="text-gray-500 text-xs">Cliente</Label>
+                    <div className="font-medium text-gray-900">{clienteSelecionado?.nome || "Não informado"}</div>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500 text-xs">Tipo de Serviço</Label>
+                    <div className="font-medium text-gray-900">{getTipoServicoLabel(ordem.tipo_servico)}</div>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500 text-xs">Data de Criação</Label>
+                    <div className="font-medium text-gray-900">
+                      {ordem.data_atual
+                        ? new Date(ordem.data_atual.split("T")[0] + "T12:00:00").toLocaleDateString("pt-BR")
+                        : "Não informada"}
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-gray-500 text-xs">Solicitado Por</Label>
+                    <div className="font-medium text-gray-900">{ordem.solicitado_por || "Não informado"}</div>
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label className="text-gray-500 flex items-center gap-2 text-xs">
+                      <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+                      Endereço do Cliente
+                    </Label>
+                    <div className="font-medium text-gray-900 bg-blue-50 p-2 md:p-3 rounded-lg mt-1 text-xs">
+                      {getEnderecoCompleto(clienteSelecionado)}
+                    </div>
+                  </div>
+                  {ordem.descricao_defeito && (
+                    <div className="md:col-span-2">
+                      <Label className="text-gray-500 text-xs">Descrição do Problema</Label>
+                      <div className="font-medium text-gray-900 bg-gray-50 p-2 md:p-3 rounded-lg mt-1 whitespace-pre-wrap text-xs">
+                        {ordem.descricao_defeito}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Dados de Execução */}
+            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 text-white rounded-t-lg p-3 md:p-6">
+                <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
+                  <User className="h-4 w-4 md:h-5 md:w-5" />
+                  Dados de Execução
+                </CardTitle>
+                <CardDescription className="text-blue-100 text-xs md:text-sm">
+                  Informações do técnico e execução do serviço
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-3 md:p-6">
+                <div className="space-y-3 md:space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    <div>
+                      <Label htmlFor="tecnico_name" className="text-xs md:text-sm">
+                        Nome do Técnico *
+                      </Label>
+                      <Input
+                        id="tecnico_name"
+                        value={tecnicoName}
+                        onChange={(e) => setTecnicoName(e.target.value)}
+                        placeholder="Nome do técnico responsável"
+                        className="text-xs md:text-sm h-9 md:h-10"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="tecnico_email" className="text-xs md:text-sm">
+                        Email do Técnico
+                      </Label>
+                      <Input
+                        id="tecnico_email"
+                        type="email"
+                        value={tecnicoEmail}
+                        onChange={(e) => setTecnicoEmail(e.target.value)}
+                        placeholder="email@exemplo.com"
+                        className="text-xs md:text-sm h-9 md:h-10"
+                      />
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Campo de Situação */}
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 md:p-4 rounded-lg border-2 border-blue-200">
+                    <Label htmlFor="situacao" className="text-xs md:text-base font-semibold flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
+                      Situação da Ordem *
+                    </Label>
+                    <Select value={situacao} onValueChange={setSituacao}>
+                      <SelectTrigger className="mt-2 bg-white h-9 md:h-10 text-xs md:text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="aberta">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-3 w-3 md:h-4 md:w-4 text-yellow-600" />
+                            <span>Aberta</span>
+                          </div>
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="data_atual" className="text-sm">
-                    Data *
-                  </Label>
-                  <Input
-                    id="data_atual"
-                    type="date"
-                    value={ordemServico.data_atual}
-                    onChange={(e) => setOrdemServico({ ...ordemServico, data_atual: e.target.value })}
-                    className="h-9"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tipo_servico" className="text-sm">
-                    Tipo de Serviço *
-                  </Label>
-                  <Select
-                    value={ordemServico.tipo_servico}
-                    onValueChange={(value) => setOrdemServico({ ...ordemServico, tipo_servico: value })}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="manutencao">Manutenção</SelectItem>
-                      <SelectItem value="orcamento">Orçamento</SelectItem>
-                      <SelectItem value="vistoria_contrato">Vistoria para Contrato</SelectItem>
-                      <SelectItem value="preventiva">Preventiva</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tecnico_id" className="text-sm">
-                    Técnico
-                  </Label>
-                  <Select
-                    value={ordemServico.tecnico_id?.toString()}
-                    onValueChange={(value) => setOrdemServico({ ...ordemServico, tecnico_id: Number(value) })}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue placeholder="Selecione o técnico" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tecnicos.map((tecnico) => (
-                        <SelectItem key={tecnico.id} value={tecnico.id.toString()}>
-                          {tecnico.nome}
+                        <SelectItem value="em_andamento">
+                          <div className="flex items-center gap-2">
+                            <PlayCircle className="h-3 w-3 md:h-4 md:w-4 text-blue-600" />
+                            <span>Em Andamento</span>
+                          </div>
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                        <SelectItem value="concluida">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-3 w-3 md:h-4 md:w-4 text-green-600" />
+                            <span>Concluída</span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[10px] md:text-xs text-gray-600 mt-2">
+                      {situacao === "em_andamento" && "Serviço está sendo executado"}
+                      {situacao === "concluida" && "Serviço finalizado"}
+                      {situacao === "aberta" && "Aguardando início da execução"}
+                    </p>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="situacao" className="text-sm">
-                    Situação *
-                  </Label>
-                  <Select
-                    value={ordemServico.situacao}
-                    onValueChange={(value) => setOrdemServico({ ...ordemServico, situacao: value })}
-                  >
-                    <SelectTrigger className="h-9">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="rascunho">Rascunho</SelectItem>
-                      <SelectItem value="aberta">Aberta</SelectItem>
-                      <SelectItem value="em_andamento">Em Andamento</SelectItem>
-                      <SelectItem value="concluida">Concluída</SelectItem>
-                      <SelectItem value="cancelada">Cancelada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  <Separator />
 
-        {/* Tab: Itens */}
-        <TabsContent value="itens" className="space-y-4">
-          <Card>
-            <CardHeader className="p-4 md:p-6">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Itens do Serviço</CardTitle>
-                <Button onClick={handleAddItem} size="sm" className="h-8">
-                  <Plus className="h-4 w-4 md:mr-2" />
-                  <span className="hidden md:inline">Adicionar</span>
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 md:p-6">
-              {itens.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 text-sm">Nenhum item adicionado</div>
-              ) : (
-                <div className="space-y-3">
-                  {itens.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between p-3 border-2 border-slate-200 rounded-lg"
-                    >
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+                    <div>
+                      <Label htmlFor="data_execucao" className="text-xs md:text-sm">
+                        Data de Execução
+                      </Label>
+                      <Input
+                        id="data_execucao"
+                        type="date"
+                        value={dataExecucao}
+                        onChange={(e) => setDataExecucao(e.target.value)}
+                        className="h-9 md:h-10"
+                      />
+                      <div className="text-[10px] md:text-xs text-gray-500 mt-1">
+                        Quando o serviço foi/será executado
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="horario_entrada" className="text-xs md:text-sm">
+                        Hora de Entrada
+                      </Label>
+                      <Input
+                        id="horario_entrada"
+                        type="time"
+                        value={horarioEntrada}
+                        onChange={(e) => setHorarioEntrada(e.target.value)}
+                        className="h-9 md:h-10"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="horario_saida" className="text-xs md:text-sm">
+                        Hora de Saída
+                      </Label>
+                      <Input
+                        id="horario_saida"
+                        type="time"
+                        value={horarioSaida}
+                        onChange={(e) => setHorarioSaida(e.target.value)}
+                        className="h-9 md:h-10"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                    <div>
+                      <Label htmlFor="responsavel" className="text-xs md:text-sm">
+                        Tipo de Responsável
+                      </Label>
+                      <Select value={responsavel} onValueChange={setResponsavel}>
+                        <SelectTrigger className="h-9 md:h-10 text-xs md:text-sm">
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="zelador">Zelador</SelectItem>
+                          <SelectItem value="porteiro">Porteiro</SelectItem>
+                          <SelectItem value="sindico">Síndico</SelectItem>
+                          <SelectItem value="outros">Outros</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="nome_responsavel" className="text-xs md:text-sm">
+                        Nome do Responsável
+                      </Label>
+                      <Input
+                        id="nome_responsavel"
+                        value={nomeResponsavel}
+                        onChange={(e) => setNomeResponsavel(e.target.value)}
+                        placeholder="Nome completo"
+                        className="h-9 md:h-10 text-xs md:text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab 2: Equipamentos */}
+          <TabsContent value="equipamentos">
+            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 text-white rounded-t-lg p-3 md:p-6">
+                <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
+                  <Package className="h-4 w-4 md:h-5 md:w-5" />
+                  Equipamentos
+                </CardTitle>
+                <CardDescription className="text-indigo-100 text-xs md:text-sm">
+                  Gerencie os equipamentos da ordem
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-3 md:p-6">
+                <div className="space-y-3 md:space-y-4">
+                  <div className="border rounded-lg p-3 md:p-4 bg-gradient-to-r from-gray-50 to-blue-50">
+                    <h4 className="font-medium mb-3 text-gray-900 text-xs md:text-base">Adicionar Equipamento</h4>
+                    <div className="flex flex-col md:flex-row gap-2 md:gap-3">
                       <div className="flex-1">
-                        <div className="font-medium text-sm">{item.descricao || "Sem descrição"}</div>
-                        <div className="text-xs text-gray-500">
-                          Qtd: {item.quantidade} | R$ {item.valor_unitario.toFixed(2)}
-                        </div>
+                        <EquipamentoCombobox value={novoEquipamentoId} onValueChange={setNovoEquipamentoId} />
                       </div>
                       <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteItem(item.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={handleAdicionarEquipamento}
+                        disabled={!novoEquipamentoId}
+                        className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 h-9 md:h-10 text-xs md:text-sm"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        Adicionar
                       </Button>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="space-y-2 md:space-y-3">
+                    {itensEquipamentos.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between p-2 md:p-3 border-2 border-slate-200 rounded-lg bg-gradient-to-r from-white to-blue-50"
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <span className="font-medium text-gray-900 text-xs md:text-sm truncate">
+                            {item.equipamento_nome_atual || item.equipamento_nome}
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoverEquipamento(item.id)}
+                          className="h-7 w-7 md:h-8 md:w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 flex-shrink-0"
+                        >
+                          <Trash2 className="w-3 h-3 md:w-4 md:h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    {itensEquipamentos.length === 0 && (
+                      <div className="text-center py-6 md:py-8 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
+                        <Package className="mx-auto h-8 w-8 md:h-12 md:w-12 text-gray-400 mb-3 md:mb-4" />
+                        <div className="text-gray-600 text-xs md:text-base">Nenhum equipamento na ordem</div>
+                        <div className="text-[10px] md:text-sm text-gray-500">
+                          Use o formulário acima para adicionar equipamentos
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {/* Tab: Fotos */}
-        <TabsContent value="fotos" className="space-y-4">
-          <Card>
-            <CardHeader className="p-4 md:p-6">
-              <CardTitle className="text-lg">Fotos do Serviço</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 md:p-6 space-y-4">
-              <CameraCapture onCapture={handleAddFoto} />
+          {/* Tab 3: Relatórios */}
+          <TabsContent value="relatorios">
+            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+              <CardHeader className="bg-gradient-to-r from-teal-500 via-cyan-600 to-blue-600 text-white rounded-t-lg p-3 md:p-6">
+                <CardTitle className="text-white flex items-center gap-2 text-base md:text-xl">
+                  <ClipboardList className="h-4 w-4 md:h-5 md:w-5" />
+                  Relatórios e Observações
+                </CardTitle>
+                <CardDescription className="text-teal-100 text-xs md:text-sm">
+                  Detalhes da execução do serviço
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-3 md:p-6">
+                <div className="space-y-3 md:space-y-4">
+                  <div>
+                    <Label htmlFor="relatorio_visita" className="text-xs md:text-sm">
+                      Relatório da Visita
+                    </Label>
+                    <Textarea
+                      id="relatorio_visita"
+                      value={relatorioVisita}
+                      onChange={(e) => setRelatorioVisita(e.target.value)}
+                      placeholder="Descreva o que foi encontrado durante a visita..."
+                      rows={ordem?.tipo_servico === "preventiva" ? 8 : 5}
+                      className="text-xs md:text-sm"
+                    />
+                  </div>
 
-              {fotos.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 text-sm">Nenhuma foto adicionada</div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {fotos.map((foto) => (
-                    <div key={foto.id} className="relative group border-2 border-slate-200 rounded-lg overflow-hidden">
-                      <img
-                        src={foto.caminho || "/placeholder.svg"}
-                        alt="Foto OS"
-                        className="w-full h-32 object-cover"
+                  {ordem?.tipo_servico === "preventiva" && (
+                    <div>
+                      <Label htmlFor="observacoes" className="text-xs md:text-sm">
+                        Necessidades do Cliente
+                      </Label>
+                      <Textarea
+                        id="observacoes"
+                        value={observacoes}
+                        onChange={(e) => setObservacoes(e.target.value)}
+                        placeholder="Adicione observações sobre necessidades específicas do cliente..."
+                        rows={4}
+                        className="text-xs md:text-sm"
                       />
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteFoto(foto.id)}
-                        className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
                     </div>
-                  ))}
+                  )}
+
+                  {ordem?.tipo_servico !== "preventiva" && (
+                    <>
+                      <div>
+                        <Label htmlFor="servico_realizado" className="text-xs md:text-sm">
+                          Serviço Realizado
+                        </Label>
+                        <Textarea
+                          id="servico_realizado"
+                          value={servicoRealizado}
+                          onChange={(e) => setServicoRealizado(e.target.value)}
+                          placeholder="Descreva os serviços que foram realizados..."
+                          rows={6}
+                          className="text-xs md:text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="observacoes" className="text-xs md:text-sm">
+                          Observações Gerais
+                        </Label>
+                        <Textarea
+                          id="observacoes"
+                          value={observacoes}
+                          onChange={(e) => setObservacoes(e.target.value)}
+                          placeholder="Observações adicionais..."
+                          rows={4}
+                          className="text-xs md:text-sm"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {/* Tab: Assinaturas */}
-        <TabsContent value="assinaturas" className="space-y-4">
-          <Card>
-            <CardHeader className="p-4 md:p-6">
-              <CardTitle className="text-lg">Assinaturas</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 md:p-6 space-y-6">
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Assinatura do Técnico</Label>
-                <SignaturePad onSave={(signature) => handleAddAssinatura("tecnico", signature)} />
-                {assinaturas.find((a) => a.tipo === "tecnico") && (
-                  <div className="border-2 border-green-200 rounded-lg p-2">
-                    <img
-                      src={assinaturas.find((a) => a.tipo === "tecnico")?.assinatura || "/placeholder.svg"}
-                      alt="Assinatura Técnico"
-                      className="max-h-24 mx-auto"
-                    />
-                  </div>
+          {/* Tab 4: Fotos */}
+          <TabsContent value="fotos">
+            <CameraCapture
+              ordemServicoId={Number.parseInt(ordemId)}
+              fotos={fotos}
+              onFotosChange={setFotos}
+              disabled={false}
+            />
+          </TabsContent>
+
+          {/* Tab 5: Assinaturas */}
+          <TabsContent value="assinaturas">
+            <SignaturePad
+              ordemServicoId={Number.parseInt(ordemId)}
+              assinaturas={assinaturas}
+              onAssinaturasChange={setAssinaturas}
+              disabled={false}
+              nomeResponsavel={nomeResponsavel}
+            />
+          </TabsContent>
+        </Tabs>
+
+        {/* Botões de Ação - Versão Mobile Otimizada */}
+        <div className="fixed md:relative bottom-0 left-0 right-0 bg-white md:bg-transparent border-t md:border-0 shadow-2xl md:shadow-xl p-3 md:p-4 z-50">
+          <div className="container mx-auto max-w-7xl">
+            <div className="flex flex-row gap-2">
+              <Button
+                onClick={() => handleSalvarOrdem(true)}
+                disabled={saving}
+                variant="secondary"
+                className="flex-1 h-10 md:h-auto text-xs md:text-sm"
+                size="sm"
+              >
+                <Save className="h-3.5 w-3.5 md:h-4 md:w-4 mr-1 md:mr-2" />
+                <span className="hidden sm:inline">Salvar </span>Rascunho
+              </Button>
+              <Button
+                onClick={() => handleSalvarOrdem(false)}
+                disabled={saving || !tecnicoName}
+                className="flex-1 h-10 md:h-auto bg-gradient-to-r from-orange-500 via-red-600 to-pink-600 hover:from-orange-600 hover:via-red-700 hover:to-pink-700 text-xs md:text-sm"
+                size="sm"
+              >
+                <Save className="h-3.5 w-3.5 md:h-4 md:w-4 mr-1 md:mr-2" />
+                {saving ? (
+                  "Salvando..."
+                ) : (
+                  <>
+                    <span className="hidden sm:inline">Salvar </span>Alterações
+                  </>
                 )}
+              </Button>
+            </div>
+
+            {/* Resumo de Progresso - Versão Compacta */}
+            <div className="mt-2 md:mt-4 grid grid-cols-5 gap-1 md:gap-2 text-[10px] md:text-xs">
+              <div className="flex flex-col md:flex-row items-center md:gap-1 text-gray-600">
+                <User className="h-3 w-3" />
+                <span className="hidden md:inline">{tecnicoName ? "✓" : "○"}</span>
+                <span className="md:hidden">{tecnicoName ? "✓" : "○"}</span>
               </div>
-
-              <Separator />
-
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Assinatura do Cliente</Label>
-                <SignaturePad onSave={(signature) => handleAddAssinatura("cliente", signature)} />
-                {assinaturas.find((a) => a.tipo === "cliente") && (
-                  <div className="border-2 border-blue-200 rounded-lg p-2">
-                    <img
-                      src={assinaturas.find((a) => a.tipo === "cliente")?.assinatura || "/placeholder.svg"}
-                      alt="Assinatura Cliente"
-                      className="max-h-24 mx-auto"
-                    />
-                  </div>
-                )}
+              <div className="flex flex-col md:flex-row items-center md:gap-1 text-gray-600">
+                <Package className="h-3 w-3" />
+                <span className="hidden md:inline">
+                  {itensEquipamentos.length > 0 ? "✓" : "○"} ({itensEquipamentos.length})
+                </span>
+                <span className="md:hidden">{itensEquipamentos.length > 0 ? "✓" : "○"}</span>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Tab: Observações */}
-        <TabsContent value="observacoes" className="space-y-4">
-          <Card>
-            <CardHeader className="p-4 md:p-6">
-              <CardTitle className="text-lg">Observações</CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 md:p-6">
-              <Textarea
-                placeholder="Digite observações sobre o serviço..."
-                value={ordemServico.observacoes || ""}
-                onChange={(e) => setOrdemServico({ ...ordemServico, observacoes: e.target.value })}
-                className="min-h-[200px]"
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Botões de ação fixos no mobile */}
-      <div className="fixed md:relative bottom-0 left-0 right-0 bg-white border-t md:border-0 p-3 md:p-0 flex gap-2 z-10">
-        <Link href="/ordem-servico" className="flex-1 md:flex-none">
-          <Button variant="outline" className="w-full md:w-auto h-10 md:h-10 bg-transparent" disabled={saving}>
-            Cancelar
-          </Button>
-        </Link>
-        <Button onClick={handleSave} disabled={saving} className="flex-1 md:flex-none h-10 md:h-10">
-          <Save className="h-4 w-4 mr-2" />
-          {saving ? "Salvando..." : "Salvar"}
-        </Button>
+              <div className="flex flex-col md:flex-row items-center md:gap-1 text-gray-600">
+                <ClipboardList className="h-3 w-3" />
+                <span className="hidden md:inline">{relatorioVisita ? "✓" : "○"}</span>
+                <span className="md:hidden">{relatorioVisita ? "✓" : "○"}</span>
+              </div>
+              <div className="flex flex-col md:flex-row items-center md:gap-1 text-gray-600">
+                <Camera className="h-3 w-3" />
+                <span className="hidden md:inline">
+                  {fotos.length > 0 ? "✓" : "○"} ({fotos.length})
+                </span>
+                <span className="md:hidden">{fotos.length > 0 ? "✓" : "○"}</span>
+              </div>
+              <div className="flex flex-col md:flex-row items-center md:gap-1 text-gray-600">
+                <PenTool className="h-3 w-3" />
+                <span className="hidden md:inline">
+                  {assinaturas.length > 0 ? "✓" : "○"} ({assinaturas.length})
+                </span>
+                <span className="md:hidden">{assinaturas.length > 0 ? "✓" : "○"}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
