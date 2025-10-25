@@ -74,6 +74,18 @@ export function SignaturePad({
     }
   }, [novaAssinatura.tipo_assinatura, nomeResponsavel])
 
+  // Bloquear scroll quando fullscreen estiver aberto
+  useEffect(() => {
+    if (isFullscreen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = "unset"
+    }
+    return () => {
+      document.body.style.overflow = "unset"
+    }
+  }, [isFullscreen])
+
   // Configurar canvas normal
   useEffect(() => {
     const canvas = canvasRef.current
@@ -626,9 +638,9 @@ export function SignaturePad({
         </CardContent>
       </Card>
 
-      {/* Modal Fullscreen para Assinatura (Mobile) */}
+      {/* Modal Fullscreen para Assinatura (Mobile) - Z-INDEX MÁXIMO */}
       {isFullscreen && (
-        <div className="fixed inset-0 bg-white z-50 flex flex-col">
+        <div className="fixed inset-0 bg-white z-[9999] flex flex-col">
           {/* Header */}
           <div className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-4 shadow-lg">
             <div className="flex items-center justify-between">
@@ -661,13 +673,13 @@ export function SignaturePad({
             </div>
           </div>
 
-          {/* Botões Fixos */}
-          <div className="p-4 bg-white border-t shadow-lg">
+          {/* Botões Fixos - SEMPRE VISÍVEIS */}
+          <div className="p-4 bg-white border-t shadow-2xl">
             <div className="flex gap-2">
               <Button
                 onClick={() => salvarAssinatura(true)}
                 disabled={saving}
-                className="flex-1 h-12 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold"
+                className="flex-1 h-12 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold shadow-lg"
               >
                 <Save className="h-5 w-5 mr-2" />
                 {saving ? "Salvando..." : "Salvar"}
@@ -675,7 +687,7 @@ export function SignaturePad({
               <Button
                 onClick={() => limparCanvas(true)}
                 variant="outline"
-                className="flex-1 h-12 border-2 border-gray-300 font-semibold"
+                className="flex-1 h-12 border-2 border-gray-300 font-semibold shadow-lg"
               >
                 <RotateCcw className="h-5 w-5 mr-2" />
                 Limpar
