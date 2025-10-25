@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     const dataOrcamentoFormatada = formatDateForMySQL(data.data_orcamento)
     const dataInicioFormatada = formatDateForMySQL(data.data_inicio)
 
-    // Inserir orçamento
+    // Inserir orçamento - AJUSTADO para corresponder exatamente à estrutura da tabela
     const insertQuery = `
       INSERT INTO orcamentos (
         id,
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         valor_mao_obra,
         desconto,
         valor_total,
-        validade_dias,
+        validade,
         observacoes,
         situacao,
         data_orcamento,
@@ -142,16 +142,8 @@ export async function POST(request: NextRequest) {
         desconto_mdo_valor,
         parcelamento_mdo,
         parcelamento_material,
-        custo_deslocamento,
-        valor_juros,
-        taxa_boleto_mdo,
-        taxa_boleto_material,
-        valor_imposto_servico,
-        valor_imposto_material,
-        subtotal_mdo,
-        subtotal_material,
         created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `
 
     const orcamentoId = generateUUID()
@@ -162,11 +154,11 @@ export async function POST(request: NextRequest) {
       data.cliente_id,
       data.tipo_servico,
       data.detalhes_servico || null,
-      data.valor_material,
-      data.valor_mao_obra,
+      data.valor_material || 0,
+      data.valor_mao_obra || 0,
       data.desconto || 0,
-      data.valor_total,
-      data.validade,
+      data.valor_total || 0,
+      data.validade || 30,
       data.observacoes || null,
       data.situacao || "pendente",
       dataOrcamentoFormatada,
@@ -181,14 +173,6 @@ export async function POST(request: NextRequest) {
       data.desconto_mdo_valor || 0,
       data.parcelamento_mdo || 1,
       data.parcelamento_material || 1,
-      data.custo_deslocamento || 0,
-      data.valor_juros || 0,
-      data.taxa_boleto_mdo || 0,
-      data.taxa_boleto_material || 0,
-      data.valor_imposto_servico || 0,
-      data.valor_imposto_material || 0,
-      data.subtotal_mdo || 0,
-      data.subtotal_material || 0,
     ])
 
     // Inserir itens
@@ -204,10 +188,11 @@ export async function POST(request: NextRequest) {
           valor_total,
           marca_nome,
           produto_ncm,
+          descricao_personalizada,
           valor_unitario_ajustado,
           valor_total_ajustado,
           created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
       `
 
       for (const item of data.itens) {
@@ -218,10 +203,11 @@ export async function POST(request: NextRequest) {
           item.produto_id,
           item.quantidade,
           item.valor_unitario,
-          item.valor_mao_obra,
+          item.valor_mao_obra || 0,
           item.valor_total,
           item.marca_nome || null,
           item.produto_ncm || null,
+          item.descricao_personalizada || null,
           item.valor_unitario_ajustado || null,
           item.valor_total_ajustado || null,
         ])
