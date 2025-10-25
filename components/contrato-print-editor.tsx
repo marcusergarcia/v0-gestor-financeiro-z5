@@ -57,6 +57,7 @@ interface LayoutConfig {
 interface SavedLayoutConfig {
   id: number
   nome: string
+  tipo: "contrato" | "orcamento"
   font_size: number
   title_font_size: number
   header_font_size: number
@@ -264,7 +265,8 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
         setLogoImpressao(logoImpressaoEncontrado || null)
       }
 
-      const layoutResponse = await fetch("/api/configuracoes/layout-impressao")
+      // Filtrar apenas configurações do tipo "contrato"
+      const layoutResponse = await fetch("/api/configuracoes/layout-impressao?tipo=contrato")
       if (layoutResponse.ok) {
         const layoutConfigs = await layoutResponse.json()
         setSavedConfigs(layoutConfigs)
@@ -343,6 +345,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nome: configToUpdate.nome,
+          tipo: "contrato",
           font_size: layoutConfig.fontSize,
           title_font_size: layoutConfig.titleFontSize,
           header_font_size: layoutConfig.headerFontSize,
@@ -411,6 +414,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
         },
         body: JSON.stringify({
           nome: saveConfigName,
+          tipo: "contrato",
           font_size: layoutConfig.fontSize,
           title_font_size: layoutConfig.titleFontSize,
           header_font_size: layoutConfig.headerFontSize,
@@ -440,7 +444,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
         setShowSaveDialog(false)
         setSaveConfigName("")
 
-        const layoutResponse = await fetch("/api/configuracoes/layout-impressao")
+        const layoutResponse = await fetch("/api/configuracoes/layout-impressao?tipo=contrato")
         if (layoutResponse.ok) {
           const layoutConfigs = await layoutResponse.json()
           setSavedConfigs(layoutConfigs)
@@ -490,7 +494,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
           description: result.message,
         })
 
-        const layoutResponse = await fetch("/api/configuracoes/layout-impressao")
+        const layoutResponse = await fetch("/api/configuracoes/layout-impressao?tipo=contrato")
         if (layoutResponse.ok) {
           const layoutConfigs = await layoutResponse.json()
           setSavedConfigs(layoutConfigs)
@@ -1006,7 +1010,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
 
               {/* Configurações salvas */}
               <div className="space-y-3 p-4 border rounded-lg">
-                <h4 className="font-medium">Configurações Salvas</h4>
+                <h4 className="font-medium">Configurações Salvas (Contratos)</h4>
                 <div className="space-y-2">
                   <Select value={selectedConfigId} onValueChange={handleLoadConfig}>
                     <SelectTrigger>
@@ -1056,7 +1060,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
               {showSaveDialog && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                   <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-                    <h3 className="text-lg font-semibold mb-4">Salvar Configuração</h3>
+                    <h3 className="text-lg font-semibold mb-4">Salvar Configuração de Contrato</h3>
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="config-name">Nome da Configuração</Label>
@@ -1064,7 +1068,7 @@ export function ContratoPrintEditor({ contrato, onClose }: ContratoPrintEditorPr
                           id="config-name"
                           value={saveConfigName}
                           onChange={(e) => setSaveConfigName(e.target.value)}
-                          placeholder="Ex: Layout Padrão, Fonte Grande, etc."
+                          placeholder="Ex: Layout Padrão Contratos, Fonte Grande, etc."
                         />
                       </div>
                       <div className="flex gap-2 justify-end">

@@ -30,6 +30,7 @@ import { ClienteCombobox, type Cliente } from "@/components/cliente-combobox"
 import { ProdutoCombobox } from "@/components/produto-combobox"
 import { ProdutoFormDialog } from "@/components/produto-form-dialog"
 import { EditarServicoDialog } from "@/components/editar-servico-dialog"
+import { OrcamentoPrintEditor } from "@/components/orcamento-print-editor"
 
 interface OrcamentoItem {
   id?: string
@@ -84,6 +85,9 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
     orcamento.data_orcamento ? orcamento.data_orcamento.split("T")[0] : new Date().toISOString().split("T")[0],
   )
   const [mostrarValoresAjustados, setMostrarValoresAjustados] = useState(false)
+
+  // Estado para controlar o modal de impressão
+  const [showPrintModal, setShowPrintModal] = useState(false)
 
   const router = useRouter()
   const { toast } = useToast()
@@ -665,7 +669,7 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
             </Button>
             <Button
               variant="outline"
-              onClick={() => router.push(`/orcamentos/${orcamento.numero}`)}
+              onClick={() => setShowPrintModal(true)}
               className="bg-white/10 hover:bg-white/20 text-white border-white/30"
             >
               <Printer className="h-4 w-4 mr-2" />
@@ -1365,6 +1369,18 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
         servico={servicoParaEditar}
         onSuccess={handleServicoEditSuccess}
       />
+
+      {/* Modal de Impressão */}
+      {showPrintModal && (
+        <OrcamentoPrintEditor
+          orcamento={{
+            ...orcamento,
+            itens: itens,
+          }}
+          itens={itens}
+          onClose={() => setShowPrintModal(false)}
+        />
+      )}
     </div>
   )
 }

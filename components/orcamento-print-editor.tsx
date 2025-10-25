@@ -45,20 +45,21 @@ interface LayoutConfig {
   pageMargin: number
   marginTop: number
   marginBottom: number
-  contentMarginTop: number // ADICIONAR
-  contentMarginBottom: number // ADICIONAR
+  contentMarginTop: number
+  contentMarginBottom: number
   showLogo: boolean
   showHeader: boolean
   showFooter: boolean
   logoSize: number
   pageBreaks: string[]
   customPageBreaks: string
-  sectionTitleFontSize: number // ADICIONAR
+  sectionTitleFontSize: number
 }
 
 interface SavedLayoutConfig {
   id: number
   nome: string
+  tipo: string
   font_size: number
   title_font_size: number
   header_font_size: number
@@ -68,8 +69,8 @@ interface SavedLayoutConfig {
   page_margin: number
   margin_top: number
   margin_bottom: number
-  content_margin_top: number // ADICIONAR
-  content_margin_bottom: number // ADICIONAR
+  content_margin_top: number
+  content_margin_bottom: number
   show_logo: boolean
   show_header: boolean
   show_footer: boolean
@@ -151,15 +152,15 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
     pageMargin: 15,
     marginTop: 10,
     marginBottom: 10,
-    contentMarginTop: 8, // ADICIONAR
-    contentMarginBottom: 8, // ADICIONAR
+    contentMarginTop: 8,
+    contentMarginBottom: 8,
     showLogo: true,
     showHeader: true,
     showFooter: true,
     logoSize: 50,
     pageBreaks: ["Serviços a serem realizados", "Condições Gerais"],
     customPageBreaks: "Serviços a serem realizados\nCondições Gerais",
-    sectionTitleFontSize: 14, // ADICIONAR
+    sectionTitleFontSize: 14,
   })
 
   const getClienteInfoForDisplay = () => {
@@ -180,17 +181,15 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
   const calcularSubtotalMdo = () => {
     if (!orcamento) return 0
 
-    // Se os valores já foram calculados e salvos no banco, usar eles
     if (orcamento.subtotal_mdo) {
       return safeNumber(orcamento.subtotal_mdo)
     }
 
-    // Caso contrário, calcular
     const valorMaoObra = safeNumber(orcamento.valor_mao_obra)
     const descontoMdoValor = safeNumber(orcamento.desconto_mdo_valor)
     const custoDeslocamento = safeNumber(orcamento.custo_deslocamento)
     const taxaBoletoMdo = safeNumber(orcamento.taxa_boleto_mdo)
-    const impostoServicoValor = safeNumber(orcamento.imposto_servico) // Correção: Usar imposto_servico
+    const impostoServicoValor = safeNumber(orcamento.imposto_servico)
 
     return valorMaoObra - descontoMdoValor + custoDeslocamento + taxaBoletoMdo + impostoServicoValor
   }
@@ -198,16 +197,14 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
   const calcularSubtotalMaterial = () => {
     if (!orcamento) return 0
 
-    // Se os valores já foram calculados e salvos no banco, usar eles
     if (orcamento.subtotal_material) {
       return safeNumber(orcamento.subtotal_material)
     }
 
-    // Caso contrário, calcular
     const valorMaterial = safeNumber(orcamento.valor_material)
     const valorJuros = safeNumber(orcamento.valor_juros)
     const taxaBoletoMaterial = safeNumber(orcamento.taxa_boleto_material)
-    const impostoMaterialValor = safeNumber(orcamento.imposto_material) // Correção: Usar imposto_material
+    const impostoMaterialValor = safeNumber(orcamento.imposto_material)
 
     return valorMaterial + valorJuros + taxaBoletoMaterial + impostoMaterialValor
   }
@@ -310,7 +307,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       if (!orcamento) return
 
       try {
-        // Buscar todas as configurações de uma vez
         const [timbradoResponse, logoResponse, termosResponse] = await Promise.all([
           fetch("/api/timbrado-config"),
           fetch("/api/configuracoes/logos"),
@@ -330,7 +326,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
           setLogoImpressao(logoImpressaoEncontrado || null)
         }
 
-        // Corrigido: Remover a redefinição de termosResponse para evitar linting error
         const termosResult = await termosResponse.json()
         if (termosResult.success && termosResult.data) {
           const termoOrcamentoAtivo = termosResult.data.find(
@@ -339,10 +334,10 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
           setTermoOrcamento(termoOrcamentoAtivo || null)
         }
 
-        const layoutResponse = await fetch("/api/configuracoes/layout-impressao")
+        // Buscar apenas configurações do tipo "orcamento"
+        const layoutResponse = await fetch("/api/configuracoes/layout-impressao?tipo=orcamento")
         if (layoutResponse.ok) {
           const layoutResult = await layoutResponse.json()
-          // Ordenar por data de atualização (mais recente primeiro)
           const sortedConfigs = layoutResult.sort((a: SavedLayoutConfig, b: SavedLayoutConfig) => {
             const dateA = new Date(a.updated_at || a.created_at).getTime()
             const dateB = new Date(b.updated_at || b.created_at).getTime()
@@ -351,7 +346,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
 
           setSavedConfigs(sortedConfigs)
 
-          // Carregar a última configuração salva (mais recente)
           if (sortedConfigs.length > 0) {
             const ultimaConfig = sortedConfigs[0]
             loadSavedConfig(ultimaConfig)
@@ -370,20 +364,18 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       }
     }
 
-    // Carregar cliente completo
     if (orcamento?.cliente_id && !clienteCompleto) {
       loadClienteCompleto()
     }
 
     loadInitialData()
-  }, []) // Executar apenas uma vez na montagem
+  }, [])
 
   useEffect(() => {
-    // Só processar quando todos os dados estiverem disponíveis
     if (timbradoConfig && termoOrcamento && orcamento && !conteudoProcessado) {
       processarConteudo()
     }
-  }, [timbradoConfig, termoOrcamento, orcamento]) // Corrigido: 'orcamento' como dependência, não apenas 'orcamento?.numero'
+  }, [timbradoConfig, termoOrcamento, orcamento])
 
   useEffect(() => {
     if (conteudoProcessado && conteudoProcessado.length > 0) {
@@ -391,12 +383,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       setPaginasPreview(paginas)
       setPaginaAtual(0)
     }
-  }, [conteudoProcessado, layoutConfig.customPageBreaks]) // Usar apenas customPageBreaks ao invés do objeto completo
-
-  const fetchConfiguracoes = async () => {
-    // This function is now replaced by the logic in the first useEffect
-    // Keeping it here for now in case other parts of the code still reference it, but it should be removed if unused.
-  }
+  }, [conteudoProcessado, layoutConfig.customPageBreaks])
 
   const loadClienteCompleto = async () => {
     if (!orcamento?.cliente_id) return
@@ -414,20 +401,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
 
   const processarConteudo = () => {
     if (!termoOrcamento?.conteudo || !timbradoConfig || !orcamento) return
-
-    console.log("=== VALORES DO ORÇAMENTO ===")
-    console.log("valor_mao_obra:", orcamento.valor_mao_obra)
-    console.log("desconto_mdo_valor:", orcamento.desconto_mdo_valor)
-    console.log("custo_deslocamento:", orcamento.custo_deslocamento)
-    console.log("taxa_boleto_mdo:", orcamento.taxa_boleto_mdo)
-    console.log("imposto_servico:", orcamento.imposto_servico) // Correção: Log de imposto_servico
-    console.log("subtotal_mdo:", orcamento.subtotal_mdo)
-    console.log("valor_material:", orcamento.valor_material)
-    console.log("valor_juros:", orcamento.valor_juros)
-    console.log("taxa_boleto_material:", orcamento.taxa_boleto_material)
-    console.log("imposto_material:", orcamento.imposto_material) // Correção: Log de imposto_material
-    console.log("subtotal_material:", orcamento.subtotal_material)
-    console.log("===========================")
 
     let conteudo = termoOrcamento.conteudo
 
@@ -456,7 +429,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
     conteudo = conteudo.replace(/\[ORCAMENTO_DATA\]/g, formatDate(orcamento.data_orcamento) || "")
     conteudo = conteudo.replace(/\[ORCAMENTO_VALIDADE\]/g, calcularDataValidade() || "")
     conteudo = conteudo.replace(/\[TIPO_SERVICO\]/g, orcamento.tipo_servico || "")
-    // Preservar quebras de linha nos detalhes do serviço
     const detalhesServico = (orcamento.detalhes_servico || "").replace(/\n/g, "<br>")
     conteudo = conteudo.replace(/\[DETALHES_SERVICO\]/g, detalhesServico)
 
@@ -481,7 +453,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
 
     conteudo = conteudo.replace(/\[LISTA_PRODUTOS\]/g, produtosTexto)
 
-    // Gerar tabela HTML de produtos - VERSÃO COMPACTA
+    // Gerar tabela HTML de produtos
     let tabelaProdutosHTML = `
 <div style="margin: 12px 0;">
   <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
@@ -523,11 +495,10 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
 </div>
 `
 
-    // Adicionar totais após a tabela - VERSÃO COMPACTA
     const descontoValor = Number(orcamento.desconto_mdo_valor) || 0
     const descontoPercent = Number(orcamento.desconto_mdo_percent) || 0
-    const subtotalMdo = calcularSubtotalMdo() // Alterado: calcular subtotal MDO
-    const subtotalMaterial = calcularSubtotalMaterial() // Alterado: calcular subtotal Material
+    const subtotalMdo = calcularSubtotalMdo()
+    const subtotalMaterial = calcularSubtotalMaterial()
     const textoParcelamento = gerarTextoParcelamento()
 
     tabelaProdutosHTML += `
@@ -564,7 +535,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
 </div>
 `
 
-    // Procurar pela seção "1.4" para inserir a tabela após ela
     const regex14 = /(1\.4[^<]*(?:Relação|relação)[^<]*(?:equipamentos|Equipamentos)[^<]*)/i
     if (regex14.test(conteudo)) {
       const match = conteudo.match(regex14)
@@ -597,12 +567,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
     } else {
       conteudo += "\n\n" + tabelaProdutosHTML + "\n\n"
     }
-
-    // Adiciona a data no final com a nova formatação - INLINE com o rodapé
-    // const localData = `<p class="data-local">${timbradoConfig.empresa_cidade || "Local"}, ${dataParaExtenso(orcamento.data_orcamento)}</p>`
-    // conteudo += "\n\n" + localData
-    // A data será adicionada apenas no OrcamentoPrintView, na última página
-    // Não adicionar aqui para evitar duplicação
 
     setConteudoProcessado(conteudo)
   }
@@ -692,9 +656,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
     const paginas: string[] = []
     let posicaoAtual = 0
 
-    // Função auxiliar para encontrar o início da tag que contém o texto
     const encontrarInicioTag = (html: string, posTexto: number): number => {
-      // Procurar para trás até encontrar o início da tag
       let pos = posTexto
       while (pos > 0 && html[pos] !== "<") {
         pos--
@@ -702,9 +664,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       return pos
     }
 
-    // Função auxiliar para encontrar o fim da tag que contém o texto
     const encontrarFimTag = (html: string, posTexto: number, textoQuebra: string): number => {
-      // Procurar para frente a partir do fim do texto até encontrar o fim da tag
       let pos = posTexto + textoQuebra.length
       let nivelTags = 0
 
@@ -713,7 +673,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
           if (html[pos + 1] === "/") {
             nivelTags--
             if (nivelTags <= 0) {
-              // Encontrar o fim desta tag de fechamento
               while (pos < html.length && html[pos] !== ">") {
                 pos++
               }
@@ -728,7 +687,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       return posTexto + textoQuebra.length
     }
 
-    // Primeira página - até a primeira quebra
     const primeiraQuebra = quebras[0]
     const posPrimeiraQuebra = conteudo.indexOf(primeiraQuebra)
 
@@ -740,7 +698,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       return [conteudo]
     }
 
-    // Páginas intermediárias
     for (let i = 0; i < quebras.length - 1; i++) {
       const quebraAtual = quebras[i]
       const proximaQuebra = quebras[i + 1]
@@ -766,7 +723,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       }
     }
 
-    // Última página
     if (posicaoAtual < conteudo.length) {
       const ultimaQuebra = quebras[quebras.length - 1]
       const posUltimaQuebra = conteudo.indexOf(ultimaQuebra, posicaoAtual)
@@ -822,8 +778,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
     `
       : ""
   }
-
-  // Removeu gerarHTMLCompleto()
 
   const handleVisualizarCompleto = () => {
     const newWindow = window.open("", "_blank", "width=1200,height=800")
@@ -921,9 +875,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
     }
   }
 
-  // Removeu handlePrintNewWindow()
-  // Removeu handlePreview()
-
   const updateLayoutConfig = (key: keyof LayoutConfig, value: any) => {
     setLayoutConfig((prev) => ({
       ...prev,
@@ -942,15 +893,15 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       pageMargin: 15,
       marginTop: 10,
       marginBottom: 10,
-      contentMarginTop: 8, // ADICIONAR
-      contentMarginBottom: 8, // ADICIONAR
+      contentMarginTop: 8,
+      contentMarginBottom: 8,
       showLogo: true,
       showHeader: true,
       showFooter: true,
       logoSize: 50,
       pageBreaks: ["Serviços a serem realizados", "Condições Gerais"],
       customPageBreaks: "Serviços a serem realizados\nCondições Gerais",
-      sectionTitleFontSize: 14, // ADICIONAR
+      sectionTitleFontSize: 14,
     })
     setSelectedConfigId("")
     toast({
@@ -980,15 +931,15 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       pageMargin: config.page_margin,
       marginTop: config.margin_top,
       marginBottom: config.margin_bottom,
-      contentMarginTop: config.content_margin_top || 8, // ADICIONAR com fallback
-      contentMarginBottom: config.content_margin_bottom || 8, // ADICIONAR com fallback
+      contentMarginTop: config.content_margin_top || 8,
+      contentMarginBottom: config.content_margin_bottom || 8,
       showLogo: config.show_logo,
       showHeader: config.show_header,
       showFooter: config.show_footer,
       logoSize: config.logo_size,
       customPageBreaks: customPageBreaks,
       pageBreaks: customPageBreaks.split("\n").filter(Boolean),
-      sectionTitleFontSize: config.title_font_size > 12 ? config.title_font_size * 0.875 : 14, // Adicionar lógica similar aos outros campos
+      sectionTitleFontSize: config.title_font_size > 12 ? config.title_font_size * 0.875 : 14,
     })
     setSelectedConfigId(config.id.toString())
     toast({
@@ -1000,8 +951,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
   const handleLoadConfig = (id: string) => {
     if (!id) {
       setSelectedConfigId("")
-      // Opcional: resetar para padrões se nenhuma configuração for selecionada
-      // resetToDefaults()
       return
     }
     const config = savedConfigs.find((c) => c.id.toString() === id)
@@ -1026,6 +975,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nome: saveConfigName,
+          tipo: "orcamento",
           font_size: layoutConfig.fontSize,
           title_font_size: layoutConfig.titleFontSize,
           header_font_size: layoutConfig.headerFontSize,
@@ -1035,8 +985,8 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
           page_margin: layoutConfig.pageMargin,
           margin_top: layoutConfig.marginTop,
           margin_bottom: layoutConfig.marginBottom,
-          content_margin_top: layoutConfig.contentMarginTop, // ADICIONAR
-          content_margin_bottom: layoutConfig.contentMarginBottom, // ADICIONAR
+          content_margin_top: layoutConfig.contentMarginTop,
+          content_margin_bottom: layoutConfig.contentMarginBottom,
           show_logo: layoutConfig.showLogo,
           show_header: layoutConfig.showHeader,
           show_footer: layoutConfig.showFooter,
@@ -1056,7 +1006,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
           setShowSaveDialog(false)
           toast({
             title: "Configuração salva",
-            description: `Layout "${saveConfigName}" salvo com sucesso.`,
+            description: `Layout "${saveConfigName}" salvo com sucesso como configuração de orçamento.`,
           })
         } else {
           console.error("Resposta da API sem id:", result)
@@ -1066,8 +1016,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
           })
           setSaveConfigName("")
           setShowSaveDialog(false)
-          // Recarregar configurações para garantir que a nova esteja na lista
-          const layoutResponse = await fetch("/api/configuracoes/layout-impressao")
+          const layoutResponse = await fetch("/api/configuracoes/layout-impressao?tipo=orcamento")
           if (layoutResponse.ok) {
             const layoutConfigs = await layoutResponse.json()
             setSavedConfigs(layoutConfigs)
@@ -1104,7 +1053,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
         setSavedConfigs(savedConfigs.filter((config) => config.id !== id))
         if (selectedConfigId === id.toString()) {
           setSelectedConfigId("")
-          resetToDefaults() // Resetar para o padrão se a config selecionada for deletada
+          resetToDefaults()
         }
         toast({
           title: "Configuração excluída",
@@ -1129,7 +1078,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
     }
   }
 
-  // Adicione a função handleUpdateConfig aqui, antes de handleSaveConfig
   const handleUpdateConfig = async () => {
     if (!selectedConfigId) {
       toast({
@@ -1155,7 +1103,8 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          nome: configToUpdate.nome, // Manter o nome original ou permitir edição se necessário
+          nome: configToUpdate.nome,
+          tipo: "orcamento",
           font_size: layoutConfig.fontSize,
           title_font_size: layoutConfig.titleFontSize,
           header_font_size: layoutConfig.headerFontSize,
@@ -1165,8 +1114,8 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
           page_margin: layoutConfig.pageMargin,
           margin_top: layoutConfig.marginTop,
           margin_bottom: layoutConfig.marginBottom,
-          content_margin_top: layoutConfig.contentMarginTop, // ADICIONAR
-          content_margin_bottom: layoutConfig.contentMarginBottom, // ADICIONAR
+          content_margin_top: layoutConfig.contentMarginTop,
+          content_margin_bottom: layoutConfig.contentMarginBottom,
           show_logo: layoutConfig.showLogo,
           show_header: layoutConfig.showHeader,
           show_footer: layoutConfig.showFooter,
@@ -1178,7 +1127,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       if (response.ok) {
         const result = await response.json()
 
-        // Atualizar a lista de configurações
         setSavedConfigs(
           savedConfigs.map((config) =>
             config.id.toString() === selectedConfigId
@@ -1327,7 +1275,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
               </div>
 
               <div className="space-y-2 p-4 border rounded-lg">
-                <h4 className="font-medium">Configurações Salvas</h4>
+                <h4 className="font-medium">Configurações de Orçamento Salvas</h4>
                 <div className="space-y-2">
                   <Select value={selectedConfigId} onValueChange={handleLoadConfig}>
                     <SelectTrigger>
@@ -1342,7 +1290,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
                     </SelectContent>
                   </Select>
 
-                  {/* Botão para atualizar a configuração atual */}
                   {selectedConfigId && (
                     <Button
                       onClick={handleUpdateConfig}
@@ -1378,7 +1325,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
               {showSaveDialog && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                   <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-                    <h3 className="text-lg font-semibold mb-4">Salvar Configuração</h3>
+                    <h3 className="text-lg font-semibold mb-4">Salvar Configuração de Orçamento</h3>
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="config-name">Nome da Configuração</Label>
@@ -1386,7 +1333,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
                           id="config-name"
                           value={saveConfigName}
                           onChange={(e) => setSaveConfigName(e.target.value)}
-                          placeholder="Ex: Layout Padrão, Fonte Grande, etc."
+                          placeholder="Ex: Layout Padrão Orçamento, Fonte Grande, etc."
                         />
                       </div>
                       <div className="flex gap-2 justify-end">
@@ -1488,7 +1435,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
                       step={1}
                     />
                   </div>
-                  {/* Novo campo para título de seção */}
+
                   <div>
                     <Label>Títulos de Seção: {layoutConfig.sectionTitleFontSize}px</Label>
                     <div className="flex items-center gap-2 mt-1">
@@ -1627,7 +1574,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
                   />
                 </div>
 
-                {/* Adicionar os novos controles aqui */}
                 <div>
                   <Label className="text-purple-600 font-medium">
                     📄 Margem superior do conteúdo (após cabeçalho): {layoutConfig.contentMarginTop}mm
@@ -1774,7 +1720,6 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
                     </div>
                   )}
                 </div>
-                {/* Substituindo os botões antigos pelos novos */}
                 <div className="flex gap-2">
                   <Button
                     onClick={handleVisualizarCompleto}
@@ -1838,7 +1783,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
                             <div className="space-y-2">
                               <h3
                                 className="font-bold underline mb-3"
-                                style={{ fontSize: `${layoutConfig.sectionTitleFontSize}px` }} // Usar novo campo
+                                style={{ fontSize: `${layoutConfig.sectionTitleFontSize}px` }}
                               >
                                 Dados do Cliente
                               </h3>
@@ -1891,7 +1836,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
                             <div className="space-y-2">
                               <h3
                                 className="font-bold underline mb-3"
-                                style={{ fontSize: `${layoutConfig.sectionTitleFontSize}px` }} // Usar novo campo
+                                style={{ fontSize: `${layoutConfig.sectionTitleFontSize}px` }}
                               >
                                 Dados do Orçamento
                               </h3>

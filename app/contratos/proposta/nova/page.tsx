@@ -100,6 +100,17 @@ export default function NovaPropostaPage() {
   }, [quantidadeVisitas])
 
   useEffect(() => {
+    // Calcular data de validade: data atual + 30 dias
+    const hoje = new Date()
+    const dataValidade = new Date(hoje)
+    dataValidade.setDate(dataValidade.getDate() + 30)
+
+    // Formatar para YYYY-MM-DD
+    const dataFormatada = dataValidade.toISOString().split("T")[0]
+    setDataValidade(dataFormatada)
+  }, [])
+
+  useEffect(() => {
     recalcularEquipamentos()
   }, [equipamentosSelecionados.length])
 

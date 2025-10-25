@@ -26,6 +26,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
     await pool.query(
       `UPDATE layout_impressao_config SET
         nome = ?,
+        tipo = ?,
         font_size = ?,
         title_font_size = ?,
         header_font_size = ?,
@@ -46,6 +47,7 @@ export async function PUT(request: Request, props: { params: Promise<{ id: strin
       WHERE id = ?`,
       [
         data.nome,
+        data.tipo || "contrato",
         data.font_size,
         data.title_font_size,
         data.header_font_size,

@@ -1,6 +1,4 @@
 "use client"
-import { Button } from "@/components/ui/button"
-import { Printer, X } from "lucide-react"
 
 interface OrcamentoPrintViewProps {
   orcamento: any
@@ -19,7 +17,6 @@ export function OrcamentoPrintView({
   layoutConfig,
   paginasPreview,
   clienteCompleto,
-  onClose,
 }: OrcamentoPrintViewProps) {
   const formatDate = (dateString: string | null | undefined): string => {
     if (!dateString) return "-"
@@ -103,10 +100,6 @@ export function OrcamentoPrintView({
 
   const clienteInfo = getClienteInfoForDisplay()
 
-  const handlePrint = () => {
-    window.print()
-  }
-
   return (
     <div className="print-container">
       <style>{`
@@ -122,9 +115,6 @@ export function OrcamentoPrintView({
             left: 0;
             top: 0;
             width: 100%;
-          }
-          .no-print {
-            display: none !important;
           }
           .page {
             page-break-after: always;
@@ -143,19 +133,6 @@ export function OrcamentoPrintView({
           font-family: Arial, sans-serif;
           background: white;
           color: black;
-        }
-
-        .no-print {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          z-index: 1000;
-          display: flex;
-          gap: 10px;
-          background: white;
-          padding: 10px;
-          border-radius: 8px;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .page {
@@ -198,14 +175,12 @@ export function OrcamentoPrintView({
           flex-direction: column;
         }
 
-        /* Estilo específico para títulos de seção */
         .page-content h3,
         .page-content p strong:only-child {
           font-size: 14px !important;
           font-weight: bold;
         }
 
-        /* Garantir que parágrafos que começam com "Serviços" ou "Condições" tenham 14px */
         .page-content > p:first-of-type {
           font-size: 14px !important;
           font-weight: bold;
@@ -281,7 +256,6 @@ export function OrcamentoPrintView({
           line-height: 1.3;
         }
 
-        /* Remover qualquer data que possa estar duplicada no conteúdo */
         .conteudo-texto .data-local {
           display: none;
         }
@@ -292,17 +266,6 @@ export function OrcamentoPrintView({
           }
         }
       `}</style>
-
-      <div className="no-print">
-        <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
-          <Printer className="mr-2 h-4 w-4" />
-          Imprimir
-        </Button>
-        <Button onClick={onClose} variant="outline">
-          <X className="mr-2 h-4 w-4" />
-          Fechar
-        </Button>
-      </div>
 
       {/* Primeira Página */}
       <div className="page">
