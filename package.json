@@ -41,7 +41,7 @@
     "next": "15.2.4",
     "next-themes": "latest",
     "path": "latest",
-    "react": "19.0.0",
+    "react": "^19.0.0",
     "react-dom": "latest",
     "react-signature-canvas": "^1.0.6",
     "sonner": "latest",
@@ -62,11 +62,5 @@
     "postcss": "^8.5",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
-  },
-  "pnpm": {
-    "overrides": {
-      "react": "19.0.0",
-      "react-dom": "19.0.0"
-    }
   }
 }
