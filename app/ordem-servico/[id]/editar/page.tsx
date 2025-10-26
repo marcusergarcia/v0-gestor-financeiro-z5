@@ -992,39 +992,78 @@ export default function EditarOrdemServicoPage() {
               </Button>
             </div>
 
-            {/* Resumo de Progresso - Versão Compacta */}
+            {/* Resumo de Progresso - Agora Clicável no Mobile */}
             <div className="mt-2 md:mt-4 grid grid-cols-5 gap-1 md:gap-2 text-[10px] md:text-xs">
-              <div className="flex flex-col md:flex-row items-center md:gap-1 text-gray-600">
-                <User className="h-3 w-3" />
+              <button
+                onClick={() => setActiveTab("info")}
+                className={`flex flex-col md:flex-row items-center md:gap-1 p-2 rounded-lg transition-all ${
+                  activeTab === "info"
+                    ? "bg-blue-100 text-blue-700 md:bg-transparent md:text-gray-600"
+                    : "text-gray-600 hover:bg-gray-100 md:hover:bg-transparent"
+                } md:cursor-default cursor-pointer md:pointer-events-none`}
+              >
+                <User className="h-4 w-4 md:h-3 md:w-3" />
                 <span className="hidden md:inline">{tecnicoName ? "✓" : "○"}</span>
-                <span className="md:hidden">{tecnicoName ? "✓" : "○"}</span>
-              </div>
-              <div className="flex flex-col md:flex-row items-center md:gap-1 text-gray-600">
-                <Package className="h-3 w-3" />
+                <span className="md:hidden mt-1">{tecnicoName ? "✓" : "○"}</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("equipamentos")}
+                className={`flex flex-col md:flex-row items-center md:gap-1 p-2 rounded-lg transition-all ${
+                  activeTab === "equipamentos"
+                    ? "bg-purple-100 text-purple-700 md:bg-transparent md:text-gray-600"
+                    : "text-gray-600 hover:bg-gray-100 md:hover:bg-transparent"
+                } md:cursor-default cursor-pointer md:pointer-events-none`}
+              >
+                <Package className="h-4 w-4 md:h-3 md:w-3" />
                 <span className="hidden md:inline">
                   {itensEquipamentos.length > 0 ? "✓" : "○"} ({itensEquipamentos.length})
                 </span>
-                <span className="md:hidden">{itensEquipamentos.length > 0 ? "✓" : "○"}</span>
-              </div>
-              <div className="flex flex-col md:flex-row items-center md:gap-1 text-gray-600">
-                <ClipboardList className="h-3 w-3" />
+                <span className="md:hidden mt-1">{itensEquipamentos.length > 0 ? "✓" : "○"}</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("relatorios")}
+                className={`flex flex-col md:flex-row items-center md:gap-1 p-2 rounded-lg transition-all ${
+                  activeTab === "relatorios"
+                    ? "bg-cyan-100 text-cyan-700 md:bg-transparent md:text-gray-600"
+                    : "text-gray-600 hover:bg-gray-100 md:hover:bg-transparent"
+                } md:cursor-default cursor-pointer md:pointer-events-none`}
+              >
+                <ClipboardList className="h-4 w-4 md:h-3 md:w-3" />
                 <span className="hidden md:inline">{relatorioVisita ? "✓" : "○"}</span>
-                <span className="md:hidden">{relatorioVisita ? "✓" : "○"}</span>
-              </div>
-              <div className="flex flex-col md:flex-row items-center md:gap-1 text-gray-600">
-                <Camera className="h-3 w-3" />
+                <span className="md:hidden mt-1">{relatorioVisita ? "✓" : "○"}</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("fotos")}
+                className={`flex flex-col md:flex-row items-center md:gap-1 p-2 rounded-lg transition-all ${
+                  activeTab === "fotos"
+                    ? "bg-green-100 text-green-700 md:bg-transparent md:text-gray-600"
+                    : "text-gray-600 hover:bg-gray-100 md:hover:bg-transparent"
+                } md:cursor-default cursor-pointer md:pointer-events-none`}
+              >
+                <Camera className="h-4 w-4 md:h-3 md:w-3" />
                 <span className="hidden md:inline">
                   {fotos.length > 0 ? "✓" : "○"} ({fotos.length})
                 </span>
-                <span className="md:hidden">{fotos.length > 0 ? "✓" : "○"}</span>
-              </div>
-              <div className="flex flex-col md:flex-row items-center md:gap-1 text-gray-600">
-                <PenTool className="h-3 w-3" />
+                <span className="md:hidden mt-1">{fotos.length > 0 ? "✓" : "○"}</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("assinaturas")}
+                className={`flex flex-col md:flex-row items-center md:gap-1 p-2 rounded-lg transition-all ${
+                  activeTab === "assinaturas"
+                    ? "bg-pink-100 text-pink-700 md:bg-transparent md:text-gray-600"
+                    : "text-gray-600 hover:bg-gray-100 md:hover:bg-transparent"
+                } md:cursor-default cursor-pointer md:pointer-events-none`}
+              >
+                <PenTool className="h-4 w-4 md:h-3 md:w-3" />
                 <span className="hidden md:inline">
                   {assinaturas.length > 0 ? "✓" : "○"} ({assinaturas.length})
                 </span>
-                <span className="md:hidden">{assinaturas.length > 0 ? "✓" : "○"}</span>
-              </div>
+                <span className="md:hidden mt-1">{assinaturas.length > 0 ? "✓" : "○"}</span>
+              </button>
             </div>
           </div>
         </div>
