@@ -65,7 +65,7 @@ export default function ConfiguracoesPage() {
           <Button
             onClick={handleExportarConfiguracoes}
             variant="outline"
-            className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 bg-transparent"
+            className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 bg-transparent hidden md:flex"
           >
             <Download className="h-4 w-4 mr-2" />
             Exportar Configurações
@@ -75,8 +75,9 @@ export default function ConfiguracoesPage() {
         <Card className="border-0 shadow-lg bg-white">
           <CardContent className="p-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="border-b bg-gradient-to-r from-indigo-50 to-purple-50">
-                <TabsList className="grid w-full grid-cols-8 h-auto p-2 bg-transparent">
+              <div className="border-b bg-gradient-to-r from-indigo-50 to-purple-50 overflow-x-auto">
+                {/* Desktop: Grid 8 colunas */}
+                <TabsList className="hidden md:grid w-full grid-cols-8 h-auto p-2 bg-transparent">
                   <TabsTrigger
                     value="logos"
                     className="flex flex-col items-center gap-1 text-xs data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white"
@@ -134,6 +135,68 @@ export default function ConfiguracoesPage() {
                     Backup
                   </TabsTrigger>
                 </TabsList>
+
+                {/* Mobile: Grid 4x2 com scroll horizontal */}
+                <div className="md:hidden">
+                  <TabsList className="inline-flex w-max h-auto p-2 bg-transparent gap-2">
+                    <TabsTrigger
+                      value="logos"
+                      className="flex flex-col items-center gap-1 px-3 py-2 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white min-w-[70px]"
+                    >
+                      <ImageIcon className="h-4 w-4" />
+                      <span className="whitespace-nowrap">Logos</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="layout"
+                      className="flex flex-col items-center gap-1 px-3 py-2 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white min-w-[70px]"
+                    >
+                      <Layout className="h-4 w-4" />
+                      <span className="whitespace-nowrap">Layout</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="equipamentos"
+                      className="flex flex-col items-center gap-1 px-3 py-2 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white min-w-[70px]"
+                    >
+                      <Wrench className="h-4 w-4" />
+                      <span className="whitespace-nowrap">Equip.</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="feriados"
+                      className="flex flex-col items-center gap-1 px-3 py-2 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500 data-[state=active]:to-amber-600 data-[state=active]:text-white min-w-[70px]"
+                    >
+                      <Calendar className="h-4 w-4" />
+                      <span className="whitespace-nowrap">Feriados</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="visitas"
+                      className="flex flex-col items-center gap-1 px-3 py-2 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white min-w-[70px]"
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span className="whitespace-nowrap">Visitas</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="valor-km"
+                      className="flex flex-col items-center gap-1 px-3 py-2 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white min-w-[70px]"
+                    >
+                      <Car className="h-4 w-4" />
+                      <span className="whitespace-nowrap">KM</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="termos"
+                      className="flex flex-col items-center gap-1 px-3 py-2 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500 data-[state=active]:to-teal-600 data-[state=active]:text-white min-w-[70px]"
+                    >
+                      <FileText className="h-4 w-4" />
+                      <span className="whitespace-nowrap">Termos</span>
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="backup"
+                      className="flex flex-col items-center gap-1 px-3 py-2 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white min-w-[70px]"
+                    >
+                      <Database className="h-4 w-4" />
+                      <span className="whitespace-nowrap">Backup</span>
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
               </div>
 
               <div className="p-6">

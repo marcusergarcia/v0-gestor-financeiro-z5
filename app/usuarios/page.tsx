@@ -244,55 +244,57 @@ export default function UsuariosPage() {
       <div className="flex items-center gap-3 mb-6">
         {logoMenu && <img src={logoMenu || "/placeholder.svg"} alt="Logo" className="h-8 w-8 object-contain rounded" />}
         <div>
-          <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h2 className="text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Gestão de Usuários
           </h2>
-          <p className="text-muted-foreground">Gerencie usuários e controle de acesso ao sistema</p>
+          <p className="text-sm lg:text-base text-muted-foreground">
+            Gerencie usuários e controle de acesso ao sistema
+          </p>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
         <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-purple-700">Total de Usuários</CardTitle>
-            <Users className="h-4 w-4 text-purple-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">Total de Usuários</CardTitle>
+            <Users className="h-3 w-3 lg:h-5 lg:w-5 text-purple-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-800">{usuarios.length}</div>
-            <p className="text-xs text-purple-600">usuários cadastrados</p>
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-lg lg:text-3xl font-bold text-purple-800">{usuarios.length}</div>
+            <p className="text-[10px] lg:text-xs text-purple-600 mt-0.5 lg:mt-1">usuários cadastrados</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">Usuários Ativos</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Usuários Ativos</CardTitle>
+            <CheckCircle className="h-3 w-3 lg:h-5 lg:w-5 text-green-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-800">{usuariosAtivos}</div>
-            <p className="text-xs text-green-600">com acesso liberado</p>
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-lg lg:text-3xl font-bold text-green-800">{usuariosAtivos}</div>
+            <p className="text-[10px] lg:text-xs text-green-600 mt-0.5 lg:mt-1">com acesso liberado</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Administradores</CardTitle>
-            <Crown className="h-4 w-4 text-blue-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Administradores</CardTitle>
+            <Crown className="h-3 w-3 lg:h-5 lg:w-5 text-blue-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-800">{usuariosAdmin}</div>
-            <p className="text-xs text-blue-600">com acesso total</p>
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-lg lg:text-3xl font-bold text-blue-800">{usuariosAdmin}</div>
+            <p className="text-[10px] lg:text-xs text-blue-600 mt-0.5 lg:mt-1">com acesso total</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-700">Técnicos</CardTitle>
-            <Shield className="h-4 w-4 text-yellow-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-yellow-700">Técnicos</CardTitle>
+            <Shield className="h-3 w-3 lg:h-5 lg:w-5 text-yellow-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-800">{usuariosTecnicos}</div>
-            <p className="text-xs text-yellow-600">perfil técnico</p>
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-lg lg:text-3xl font-bold text-yellow-800">{usuariosTecnicos}</div>
+            <p className="text-[10px] lg:text-xs text-yellow-600 mt-0.5 lg:mt-1">perfil técnico</p>
           </CardContent>
         </Card>
       </div>

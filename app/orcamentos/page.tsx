@@ -214,46 +214,46 @@ export default function OrcamentosPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="container mx-auto p-6 space-y-6 max-w-full">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div className="container mx-auto p-3 lg:p-6 space-y-3 lg:space-y-6 max-w-full">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-2 lg:gap-4">
             {logoMenu && (
               <img
                 src={logoMenu || "/placeholder.svg"}
                 alt="Logo"
-                className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
+                className="h-8 w-8 lg:h-12 lg:w-12 object-contain rounded-lg shadow-md bg-white p-1"
               />
             )}
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                 Orçamentos
               </h1>
-              <p className="text-gray-600 mt-1">Gerencie todos os orçamentos do sistema</p>
+              <p className="text-xs lg:text-base text-gray-600 mt-1">Gerencie todos os orçamentos do sistema</p>
             </div>
           </div>
           <Link href="/orcamentos/novo">
-            <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg">
-              <Plus className="mr-2 h-4 w-4" />
+            <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg text-xs lg:text-sm h-8 lg:h-10">
+              <Plus className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
               Novo Orçamento
             </Button>
           </Link>
         </div>
 
         {/* Stats Cards - Agora clicáveis */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 lg:gap-4">
           <Card
             className={`border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
               situacaoFilter === "todos" ? "ring-2 ring-blue-400 ring-offset-2" : ""
             }`}
             onClick={() => setSituacaoFilter("todos")}
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">Total</CardTitle>
-              <FileText className="h-5 w-5 text-blue-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
+              <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total</CardTitle>
+              <FileText className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-800">{total}</div>
-              <p className="text-xs text-blue-600 mt-1">Orçamentos</p>
+            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
+              <div className="text-xl lg:text-3xl font-bold text-blue-800">{total}</div>
+              <p className="text-[10px] lg:text-xs text-blue-600 mt-1">Orçamentos</p>
             </CardContent>
           </Card>
 
@@ -263,13 +263,13 @@ export default function OrcamentosPage() {
             }`}
             onClick={() => setSituacaoFilter("pendente")}
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-amber-700">Pendentes</CardTitle>
-              <Calendar className="h-5 w-5 text-amber-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
+              <CardTitle className="text-xs lg:text-sm font-medium text-amber-700">Pendentes</CardTitle>
+              <Calendar className="h-4 w-4 lg:h-5 lg:w-5 text-amber-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-amber-800">{pendentes}</div>
-              <p className="text-xs text-amber-600 mt-1">Aguardando</p>
+            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
+              <div className="text-xl lg:text-3xl font-bold text-amber-800">{pendentes}</div>
+              <p className="text-[10px] lg:text-xs text-amber-600 mt-1">Aguardando</p>
             </CardContent>
           </Card>
 
@@ -279,13 +279,13 @@ export default function OrcamentosPage() {
             }`}
             onClick={() => setSituacaoFilter("enviado")}
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-cyan-700">Enviados</CardTitle>
-              <Send className="h-5 w-5 text-cyan-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
+              <CardTitle className="text-xs lg:text-sm font-medium text-cyan-700">Enviados</CardTitle>
+              <Send className="h-4 w-4 lg:h-5 lg:w-5 text-cyan-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-cyan-800">{enviados}</div>
-              <p className="text-xs text-cyan-600 mt-1">Por email</p>
+            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
+              <div className="text-xl lg:text-3xl font-bold text-cyan-800">{enviados}</div>
+              <p className="text-[10px] lg:text-xs text-cyan-600 mt-1">Por email</p>
             </CardContent>
           </Card>
 
@@ -295,13 +295,13 @@ export default function OrcamentosPage() {
             }`}
             onClick={() => setSituacaoFilter("nf-emitida")}
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-purple-700">NF Emitida</CardTitle>
-              <FileCheck className="h-5 w-5 text-purple-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
+              <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">NF Emitida</CardTitle>
+              <FileCheck className="h-4 w-4 lg:h-5 lg:w-5 text-purple-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-purple-800">{notaFiscal}</div>
-              <p className="text-xs text-purple-600 mt-1">Nota fiscal</p>
+            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
+              <div className="text-xl lg:text-3xl font-bold text-purple-800">{notaFiscal}</div>
+              <p className="text-[10px] lg:text-xs text-purple-600 mt-1">Nota fiscal</p>
             </CardContent>
           </Card>
 
@@ -311,45 +311,45 @@ export default function OrcamentosPage() {
             }`}
             onClick={() => setSituacaoFilter("concluido")}
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-green-700">Concluídos</CardTitle>
-              <CheckCircle className="h-5 w-5 text-green-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
+              <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Concluídos</CardTitle>
+              <CheckCircle className="h-4 w-4 lg:h-5 lg:w-5 text-green-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-800">{concluidos}</div>
-              <p className="text-xs text-green-600 mt-1">Finalizados</p>
+            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
+              <div className="text-xl lg:text-3xl font-bold text-green-800">{concluidos}</div>
+              <p className="text-[10px] lg:text-xs text-green-600 mt-1">Finalizados</p>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-lg bg-gradient-to-br from-indigo-50 to-indigo-100 hover:shadow-xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-indigo-700">Valor Total</CardTitle>
-              <DollarSign className="h-5 w-5 text-indigo-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
+              <CardTitle className="text-xs lg:text-sm font-medium text-indigo-700">Valor Total</CardTitle>
+              <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-indigo-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-indigo-800">{formatCurrency(valorTotal)}</div>
-              <p className="text-xs text-indigo-600 mt-1">Soma total</p>
+            <CardContent className="p-3 pt-0 lg:p-6 lg:pt-0">
+              <div className="text-2xl lg:text-3xl font-bold text-indigo-800">{formatCurrency(valorTotal)}</div>
+              <p className="text-xs lg:text-sm text-indigo-600 mt-1">Soma total</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Filtros */}
         <Card className="bg-gradient-to-r from-white to-gray-50">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-4">
+          <CardContent className="p-3 lg:p-4">
+            <div className="flex flex-col sm:flex-row gap-2 lg:gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-2.5 lg:top-3 h-3 w-3 lg:h-4 lg:w-4 text-gray-400" />
                 <Input
                   placeholder="Buscar por número, cliente..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-8 lg:pl-10 h-8 lg:h-10 text-xs lg:text-sm"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4 text-gray-400" />
+                <Filter className="h-3 w-3 lg:h-4 lg:w-4 text-gray-400" />
                 <Select value={situacaoFilter} onValueChange={setSituacaoFilter}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="w-full sm:w-48 h-8 lg:h-10 text-xs lg:text-sm">
                     <SelectValue placeholder="Filtrar por situação" />
                   </SelectTrigger>
                   <SelectContent>
@@ -367,116 +367,118 @@ export default function OrcamentosPage() {
 
         {/* Tabela */}
         <div className="border-0 shadow-lg bg-white rounded-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-6 py-4">
-            <h2 className="text-xl font-semibold">Lista de Orçamentos</h2>
-            <p className="text-sm text-purple-100 mt-1">
+          <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-3 py-2 lg:px-6 lg:py-4">
+            <h2 className="text-base lg:text-xl font-semibold">Lista de Orçamentos</h2>
+            <p className="text-xs lg:text-sm text-purple-100 mt-1">
               {filteredOrcamentos.length} orçamento{filteredOrcamentos.length !== 1 ? "s" : ""} encontrado
               {filteredOrcamentos.length !== 1 ? "s" : ""}
             </p>
           </div>
 
           {filteredOrcamentos.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-              <h3 className="text-xl font-medium text-gray-900 mb-2">Nenhum orçamento encontrado</h3>
-              <p className="text-gray-600 mb-6">
+            <div className="text-center py-8 lg:py-12 px-3">
+              <FileText className="mx-auto h-12 w-12 lg:h-16 lg:w-16 text-gray-400 mb-3 lg:mb-4" />
+              <h3 className="text-lg lg:text-xl font-medium text-gray-900 mb-2">Nenhum orçamento encontrado</h3>
+              <p className="text-sm lg:text-base text-gray-600 mb-4 lg:mb-6">
                 {searchTerm || situacaoFilter !== "todos"
                   ? "Tente ajustar os filtros de busca"
                   : "Comece criando seu primeiro orçamento"}
               </p>
               {!searchTerm && situacaoFilter === "todos" && (
                 <Link href="/orcamentos/novo">
-                  <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white">
-                    <Plus className="mr-2 h-4 w-4" />
+                  <Button className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-xs lg:text-sm">
+                    <Plus className="mr-1 lg:mr-2 h-3 w-3 lg:h-4 lg:w-4" />
                     Criar Primeiro Orçamento
                   </Button>
                 </Link>
               )}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50">
-                    <TableHead className="font-semibold whitespace-nowrap">Número</TableHead>
-                    <TableHead className="font-semibold whitespace-nowrap">Cliente</TableHead>
-                    <TableHead className="font-semibold whitespace-nowrap">Data</TableHead>
-                    <TableHead className="font-semibold whitespace-nowrap">Valor Total</TableHead>
-                    <TableHead className="font-semibold whitespace-nowrap">Status</TableHead>
-                    <TableHead className="font-semibold whitespace-nowrap">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOrcamentos.map((orcamento) => (
-                    <TableRow key={orcamento.id} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="font-medium whitespace-nowrap">
-                        <Badge variant="outline" className="font-mono text-xs">
-                          {orcamento.numero}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="min-w-[200px]">
-                        <div className="flex items-center gap-2">
-                          <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <span className="font-medium block">{orcamento.cliente_nome}</span>
-                            {orcamento.cliente_codigo && (
-                              <div className="text-xs text-gray-500">{orcamento.cliente_codigo}</div>
-                            )}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                          <span className="text-sm">{formatDate(orcamento.data_orcamento)}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="h-3 w-3 text-green-600 flex-shrink-0" />
-                          <span className="font-semibold text-green-600 text-sm">
-                            {formatCurrency(Number(orcamento.valor_total))}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">{getStatusBadge(orcamento.situacao)}</TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        <div className="flex gap-1">
-                          <Link href={`/orcamentos/${orcamento.numero}`}>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0"
-                              title="Visualizar orçamento"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          <Link href={`/orcamentos/${orcamento.numero}/editar`}>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0"
-                              title="Editar orçamento"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDelete(orcamento.numero)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0"
-                            title="Excluir orçamento"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+            <div className="overflow-x-auto -mx-3 lg:mx-0">
+              <div className="inline-block min-w-full align-middle">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-gray-50">
+                      <TableHead className="font-semibold whitespace-nowrap">Número</TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap">Cliente</TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap">Data</TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap">Valor Total</TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap">Status</TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap">Ações</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOrcamentos.map((orcamento) => (
+                      <TableRow key={orcamento.id} className="hover:bg-gray-50 transition-colors">
+                        <TableCell className="font-medium whitespace-nowrap">
+                          <Badge variant="outline" className="font-mono text-xs">
+                            {orcamento.numero}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="min-w-[200px]">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                            <div className="min-w-0">
+                              <span className="font-medium block">{orcamento.cliente_nome}</span>
+                              {orcamento.cliente_codigo && (
+                                <div className="text-xs text-gray-500">{orcamento.cliente_codigo}</div>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                            <span className="text-sm">{formatDate(orcamento.data_orcamento)}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-3 w-3 text-green-600 flex-shrink-0" />
+                            <span className="font-semibold text-green-600 text-sm">
+                              {formatCurrency(Number(orcamento.valor_total))}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">{getStatusBadge(orcamento.situacao)}</TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <div className="flex gap-1">
+                            <Link href={`/orcamentos/${orcamento.numero}`}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-transparent h-8 w-8 p-0"
+                                title="Visualizar orçamento"
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                            <Link href={`/orcamentos/${orcamento.numero}/editar`}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 bg-transparent h-8 w-8 p-0"
+                                title="Editar orçamento"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDelete(orcamento.numero)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent h-8 w-8 p-0"
+                              title="Excluir orçamento"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
         </div>

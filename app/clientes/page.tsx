@@ -274,10 +274,10 @@ export default function ClientesPage() {
               />
             )}
             <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Clientes
               </h1>
-              <p className="text-gray-600 mt-1">Gerencie seus clientes e informações de contato</p>
+              <p className="text-sm lg:text-base text-gray-600 mt-1">Gerencie seus clientes e informações de contato</p>
             </div>
           </div>
           <Button onClick={handleNovoCliente}>
@@ -287,39 +287,43 @@ export default function ClientesPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-6">
           <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-blue-700">Total de Clientes</CardTitle>
-              <Users className="h-5 w-5 text-blue-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+              <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total de Clientes</CardTitle>
+              <Users className="h-3 w-3 lg:h-5 lg:w-5 text-blue-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-blue-800">{clientes.length}</div>
-              <p className="text-xs text-blue-600 mt-1">
+            <CardContent className="p-3 lg:p-6 pt-0">
+              <div className="text-lg lg:text-3xl font-bold text-blue-800">{clientes.length}</div>
+              <p className="text-[10px] lg:text-xs text-blue-600 mt-0.5 lg:mt-1">
                 {filteredClientes.length !== clientes.length && `${filteredClientes.length} filtrados`}
               </p>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 hover:shadow-xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-green-700">Empresas</CardTitle>
-              <Building2 className="h-5 w-5 text-green-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+              <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Empresas</CardTitle>
+              <Building2 className="h-3 w-3 lg:h-5 lg:w-5 text-green-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-800">{clientes.filter((c) => c.cnpj).length}</div>
-              <p className="text-xs text-green-600 mt-1">Com CNPJ cadastrado</p>
+            <CardContent className="p-3 lg:p-6 pt-0">
+              <div className="text-lg lg:text-3xl font-bold text-green-800">
+                {clientes.filter((c) => c.cnpj).length}
+              </div>
+              <p className="text-[10px] lg:text-xs text-green-600 mt-0.5 lg:mt-1">Com CNPJ cadastrado</p>
             </CardContent>
           </Card>
 
           <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-purple-700">Com Contrato</CardTitle>
-              <Badge className="h-5 w-5 bg-purple-100 text-purple-600" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+              <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">Com Contrato</CardTitle>
+              <Badge className="h-3 w-3 lg:h-5 lg:w-5 bg-purple-100 text-purple-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-purple-800">{clientes.filter((c) => c.tem_contrato).length}</div>
-              <p className="text-xs text-purple-600 mt-1">Contratos ativos</p>
+            <CardContent className="p-3 lg:p-6 pt-0">
+              <div className="text-lg lg:text-3xl font-bold text-purple-800">
+                {clientes.filter((c) => c.tem_contrato).length}
+              </div>
+              <p className="text-[10px] lg:text-xs text-purple-600 mt-0.5 lg:mt-1">Contratos ativos</p>
             </CardContent>
           </Card>
         </div>

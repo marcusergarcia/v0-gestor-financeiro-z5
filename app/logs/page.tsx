@@ -300,7 +300,7 @@ export default function LogsPage() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 lg:grid-cols-7 gap-3 lg:gap-4">
           {Array.from({ length: 7 }).map((_, i) => (
             <Card key={i}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -326,10 +326,12 @@ export default function LogsPage() {
             <img src={logoMenu || "/placeholder.svg"} alt="Logo" className="h-8 w-8 object-contain rounded" />
           )}
           <div>
-            <h2 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-gray-600 to-slate-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl lg:text-3xl font-bold tracking-tight bg-gradient-to-r from-gray-600 to-slate-600 bg-clip-text text-transparent">
               Logs do Sistema
             </h2>
-            <p className="text-muted-foreground">Monitore atividades, login/logout e operações dos usuários</p>
+            <p className="text-sm lg:text-base text-muted-foreground">
+              Monitore atividades, login/logout e operações dos usuários
+            </p>
           </div>
         </div>
 
@@ -343,81 +345,81 @@ export default function LogsPage() {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+      <div className="grid grid-cols-2 lg:grid-cols-7 gap-3 lg:gap-4">
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Total de Logs</CardTitle>
-            <Activity className="h-4 w-4 text-blue-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total de Logs</CardTitle>
+            <Activity className="h-3 w-3 lg:h-4 lg:w-4 text-blue-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-800">{stats.total}</div>
-            <p className="text-xs text-blue-600">registros</p>
+          <CardContent className="p-3 lg:p-4 pt-0">
+            <div className="text-lg lg:text-2xl font-bold text-blue-800">{stats.total}</div>
+            <p className="text-[10px] lg:text-xs text-blue-600 mt-0.5">registros</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">Logins</CardTitle>
-            <LogIn className="h-4 w-4 text-green-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Logins</CardTitle>
+            <LogIn className="h-3 w-3 lg:h-4 lg:w-4 text-green-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-800">{stats.logins}</div>
-            <p className="text-xs text-green-600">acessos</p>
+          <CardContent className="p-3 lg:p-4 pt-0">
+            <div className="text-lg lg:text-2xl font-bold text-green-800">{stats.logins}</div>
+            <p className="text-[10px] lg:text-xs text-green-600 mt-0.5">acessos</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-orange-700">Logouts</CardTitle>
-            <LogOut className="h-4 w-4 text-orange-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-orange-700">Logouts</CardTitle>
+            <LogOut className="h-3 w-3 lg:h-4 lg:w-4 text-orange-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-800">{stats.logouts}</div>
-            <p className="text-xs text-orange-600">saídas</p>
+          <CardContent className="p-3 lg:p-4 pt-0">
+            <div className="text-lg lg:text-2xl font-bold text-orange-800">{stats.logouts}</div>
+            <p className="text-[10px] lg:text-xs text-orange-600 mt-0.5">saídas</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-purple-700">Criações</CardTitle>
-            <Plus className="h-4 w-4 text-purple-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">Criações</CardTitle>
+            <Plus className="h-3 w-3 lg:h-4 lg:w-4 text-purple-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-800">{stats.creates}</div>
-            <p className="text-xs text-purple-600">novos registros</p>
+          <CardContent className="p-3 lg:p-4 pt-0">
+            <div className="text-lg lg:text-2xl font-bold text-purple-800">{stats.creates}</div>
+            <p className="text-[10px] lg:text-xs text-purple-600 mt-0.5">novos registros</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-700">Edições</CardTitle>
-            <Edit className="h-4 w-4 text-yellow-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-yellow-700">Edições</CardTitle>
+            <Edit className="h-3 w-3 lg:h-4 lg:w-4 text-yellow-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-800">{stats.updates}</div>
-            <p className="text-xs text-yellow-600">alterações</p>
+          <CardContent className="p-3 lg:p-4 pt-0">
+            <div className="text-lg lg:text-2xl font-bold text-yellow-800">{stats.updates}</div>
+            <p className="text-[10px] lg:text-xs text-yellow-600 mt-0.5">alterações</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">Exclusões</CardTitle>
-            <Trash2 className="h-4 w-4 text-red-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-red-700">Exclusões</CardTitle>
+            <Trash2 className="h-3 w-3 lg:h-4 lg:w-4 text-red-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-800">{stats.deletes}</div>
-            <p className="text-xs text-red-600">remoções</p>
+          <CardContent className="p-3 lg:p-4 pt-0">
+            <div className="text-lg lg:text-2xl font-bold text-red-800">{stats.deletes}</div>
+            <p className="text-[10px] lg:text-xs text-red-600 mt-0.5">remoções</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">Erros</CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-4 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-red-700">Erros</CardTitle>
+            <XCircle className="h-3 w-3 lg:h-4 lg:w-4 text-red-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-800">{stats.errors}</div>
-            <p className="text-xs text-red-600">problemas</p>
+          <CardContent className="p-3 lg:p-4 pt-0">
+            <div className="text-lg lg:text-2xl font-bold text-red-800">{stats.errors}</div>
+            <p className="text-[10px] lg:text-xs text-red-600 mt-0.5">problemas</p>
           </CardContent>
         </Card>
       </div>

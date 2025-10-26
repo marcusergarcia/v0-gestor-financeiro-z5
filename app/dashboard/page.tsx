@@ -370,19 +370,19 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
+      {/* Stats Cards - Grid 2x2 otimizado para mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-6">
         <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">
               <span className="hidden sm:inline">Total Clientes</span>
               <span className="sm:hidden">Clientes</span>
             </CardTitle>
-            <Users className="h-4 w-4 lg:h-5 lg:w-5 text-blue-600" />
+            <Users className="h-3 w-3 lg:h-5 lg:w-5 text-blue-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-xl lg:text-3xl font-bold text-blue-800">{stats.totalClientes}</div>
-            <p className="text-xs text-blue-600 mt-1">
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-lg lg:text-3xl font-bold text-blue-800">{stats.totalClientes}</div>
+            <p className="text-[10px] lg:text-xs text-blue-600 mt-0.5 lg:mt-1">
               <span className="hidden lg:inline">
                 {stats.clientesComContrato} com contrato • {stats.totalEmpresas} empresas
               </span>
@@ -392,18 +392,18 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-green-700">
               <span className="hidden sm:inline">Receita Boletos</span>
               <span className="sm:hidden">Receita</span>
             </CardTitle>
-            <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-green-600" />
+            <DollarSign className="h-3 w-3 lg:h-5 lg:w-5 text-green-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-lg lg:text-2xl font-bold text-green-800">
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-sm lg:text-2xl font-bold text-green-800">
               {formatValueOrHide(stats.valorTotalBoletos)}
             </div>
-            <p className="text-xs text-green-600 mt-1">
+            <p className="text-[10px] lg:text-xs text-green-600 mt-0.5 lg:mt-1">
               <span className="hidden lg:inline">{stats.totalBoletos} boletos emitidos</span>
               <span className="lg:hidden">{stats.totalBoletos} boletos</span>
             </p>
@@ -411,15 +411,15 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-purple-700">Orçamentos</CardTitle>
-            <Calculator className="h-4 w-4 lg:h-5 lg:w-5 text-purple-600" />
+            <Calculator className="h-3 w-3 lg:h-5 lg:w-5 text-purple-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-lg lg:text-2xl font-bold text-purple-800">
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-sm lg:text-2xl font-bold text-purple-800">
               {formatValueOrHide(stats.valorTotalOrcamentos)}
             </div>
-            <p className="text-xs text-purple-600 mt-1">
+            <p className="text-[10px] lg:text-xs text-purple-600 mt-0.5 lg:mt-1">
               <span className="hidden lg:inline">
                 {stats.orcamentosAbertos} abertos • {stats.orcamentosAprovados} aprovados
               </span>
@@ -429,13 +429,13 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-yellow-100 hover:shadow-xl transition-all duration-300">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
             <CardTitle className="text-xs lg:text-sm font-medium text-yellow-700">Alertas</CardTitle>
-            <AlertTriangle className="h-4 w-4 lg:h-5 lg:w-5 text-yellow-600" />
+            <AlertTriangle className="h-3 w-3 lg:h-5 lg:w-5 text-yellow-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-xl lg:text-3xl font-bold text-yellow-800">{stats.boletosVencidos}</div>
-            <p className="text-xs text-yellow-600 mt-1">
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-lg lg:text-3xl font-bold text-yellow-800">{stats.boletosVencidos}</div>
+            <p className="text-[10px] lg:text-xs text-yellow-600 mt-0.5 lg:mt-1">
               <span className="hidden lg:inline">Boletos vencidos • {stats.boletosPendentes} pendentes</span>
               <span className="lg:hidden">Vencidos</span>
             </p>
@@ -556,10 +556,10 @@ export default function DashboardPage() {
             <CardTitle className="text-lg lg:text-xl font-bold text-gray-900">Ações Rápidas</CardTitle>
             <CardDescription className="text-sm">Acesso rápido às principais funcionalidades</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3 lg:space-y-4 p-4 lg:p-6">
-            <div className="grid grid-cols-1 gap-2 lg:gap-3">
+          <CardContent className="space-y-2 lg:space-y-3 p-4 lg:p-6">
+            <div className="grid grid-cols-1 gap-2">
               <Button
-                className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white justify-start h-10 lg:h-12 text-sm lg:text-base"
+                className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white justify-start h-9 lg:h-12 text-sm lg:text-base"
                 asChild
               >
                 <Link href="/ordem-servico/nova">
@@ -569,7 +569,7 @@ export default function DashboardPage() {
               </Button>
 
               <Button
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white justify-start h-10 lg:h-12 text-sm lg:text-base"
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white justify-start h-9 lg:h-12 text-sm lg:text-base"
                 asChild
               >
                 <Link href="/orcamentos/novo">
@@ -579,7 +579,7 @@ export default function DashboardPage() {
               </Button>
 
               <Button
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white justify-start h-10 lg:h-12 text-sm lg:text-base"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white justify-start h-9 lg:h-12 text-sm lg:text-base"
                 asChild
               >
                 <Link href="/financeiro/novo">
@@ -589,7 +589,7 @@ export default function DashboardPage() {
               </Button>
 
               <Button
-                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white justify-start h-10 lg:h-12 text-sm lg:text-base"
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white justify-start h-9 lg:h-12 text-sm lg:text-base"
                 asChild
               >
                 <Link href="/clientes/novo">
@@ -599,7 +599,7 @@ export default function DashboardPage() {
               </Button>
 
               <Button
-                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white justify-start h-10 lg:h-12 text-sm lg:text-base"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white justify-start h-9 lg:h-12 text-sm lg:text-base"
                 asChild
               >
                 <Link href="/produtos/novo">
@@ -609,7 +609,7 @@ export default function DashboardPage() {
               </Button>
 
               <Button
-                className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white justify-start h-10 lg:h-12 text-sm lg:text-base"
+                className="bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white justify-start h-9 lg:h-12 text-sm lg:text-base"
                 asChild
               >
                 <Link href="/contratos/proposta/nova">
@@ -620,12 +620,12 @@ export default function DashboardPage() {
             </div>
 
             {/* Status do Sistema */}
-            <div className="mt-4 lg:mt-6 p-3 lg:p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
-              <h4 className="font-semibold text-gray-900 mb-2 lg:mb-3 flex items-center gap-2 text-sm lg:text-base">
+            <div className="mt-3 lg:mt-6 p-3 lg:p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg">
+              <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2 text-sm lg:text-base">
                 <CheckCircle className="h-4 w-4 text-green-600" />
                 Status do Sistema
               </h4>
-              <div className="space-y-1 lg:space-y-2 text-xs lg:text-sm">
+              <div className="space-y-1 text-xs lg:text-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Sistema</span>
                   <Badge className="bg-green-100 text-green-800 text-xs">Online</Badge>

@@ -458,10 +458,10 @@ export default function FinanceiroPage() {
             />
           )}
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
               Gestão Financeira
             </h1>
-            <p className="text-gray-600 mt-1">Controle de boletos e recibos</p>
+            <p className="text-sm lg:text-base text-gray-600 mt-1">Controle de boletos e recibos</p>
           </div>
         </div>
 
@@ -486,20 +486,20 @@ export default function FinanceiroPage() {
       </div>
 
       {/* Stats Cards - Agora clicáveis */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6">
         <Card
           className={`border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105 ${
             statusFilter === "all" ? "ring-2 ring-blue-400 ring-offset-2" : ""
           }`}
           onClick={() => setStatusFilter("all")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-700">Total</CardTitle>
-            <FileText className="h-5 w-5 text-blue-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total</CardTitle>
+            <FileText className="h-3 w-3 lg:h-5 lg:w-5 text-blue-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-800">{boletosStatsTotais.total}</div>
-            <p className="text-xs text-blue-600 mt-1">{formatarValor(boletosStatsTotais.valorTotal)}</p>
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-lg lg:text-3xl font-bold text-blue-800">{boletosStatsTotais.total}</div>
+            <p className="text-[10px] lg:text-xs text-blue-600 mt-0.5 lg:mt-1">boletos cadastrados</p>
           </CardContent>
         </Card>
 
@@ -509,13 +509,13 @@ export default function FinanceiroPage() {
           }`}
           onClick={() => setStatusFilter("pago")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-green-700">Boletos Pagos</CardTitle>
-            <CheckCircle className="h-5 w-5 text-green-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Boletos Pagos</CardTitle>
+            <CheckCircle className="h-3 w-3 lg:h-5 lg:w-5 text-green-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-800">{boletosStatsTotais.pagos}</div>
-            <p className="text-xs text-green-600 mt-1">
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-lg lg:text-3xl font-bold text-green-800">{boletosStatsTotais.pagos}</div>
+            <p className="text-[10px] lg:text-xs text-green-600 mt-0.5 lg:mt-1">
               {formatarValor(
                 boletos
                   .filter((b) => b.status === "pago")
@@ -531,13 +531,13 @@ export default function FinanceiroPage() {
           }`}
           onClick={() => setStatusFilter("pendente")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-700">Pendentes</CardTitle>
-            <Clock className="h-5 w-5 text-yellow-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-yellow-700">Pendentes</CardTitle>
+            <Clock className="h-3 w-3 lg:h-5 lg:w-5 text-yellow-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-yellow-800">{boletosStatsTotais.pendentes}</div>
-            <p className="text-xs text-yellow-600 mt-1">Aguardando pagamento</p>
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-lg lg:text-3xl font-bold text-yellow-800">{boletosStatsTotais.pendentes}</div>
+            <p className="text-[10px] lg:text-xs text-yellow-600 mt-0.5 lg:mt-1">Aguardando pagamento</p>
           </CardContent>
         </Card>
 
@@ -547,13 +547,13 @@ export default function FinanceiroPage() {
           }`}
           onClick={() => setStatusFilter("vencido")}
         >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-red-700">Vencidos</CardTitle>
-            <AlertTriangle className="h-5 w-5 text-red-600" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+            <CardTitle className="text-xs lg:text-sm font-medium text-red-700">Vencidos</CardTitle>
+            <AlertTriangle className="h-3 w-3 lg:h-5 lg:w-5 text-red-600" />
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-red-800">{boletosStatsTotais.vencidos}</div>
-            <p className="text-xs text-red-600 mt-1">Requer atenção</p>
+          <CardContent className="p-3 lg:p-6 pt-0">
+            <div className="text-lg lg:text-3xl font-bold text-red-800">{boletosStatsTotais.vencidos}</div>
+            <p className="text-[10px] lg:text-xs text-red-600 mt-0.5 lg:mt-1">Requer atenção</p>
           </CardContent>
         </Card>
       </div>
@@ -589,7 +589,7 @@ export default function FinanceiroPage() {
               </div>
               <Button
                 onClick={() => setShowNovoBoleto(true)}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg"
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg h-9 lg:h-12 text-sm lg:text-base"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Boleto
@@ -670,7 +670,7 @@ export default function FinanceiroPage() {
                     {!searchBoletos && statusFilter === "all" && periodoFilter === "todos" && (
                       <Button
                         onClick={() => setShowNovoBoleto(true)}
-                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                        className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white h-9 lg:h-12 text-sm lg:text-base"
                       >
                         <Plus className="h-4 w-4 mr-2" />
                         Criar Primeiro Boleto
@@ -728,7 +728,7 @@ export default function FinanceiroPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleVisualizarBoleto(boleto)}
-                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-transparent"
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Button>
@@ -736,7 +736,7 @@ export default function FinanceiroPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => handleEditarBoleto(boleto)}
-                                  className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 bg-transparent"
+                                  className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -745,7 +745,7 @@ export default function FinanceiroPage() {
                                   variant="outline"
                                   onClick={() => handleExcluirBoleto(boleto)}
                                   disabled={deletingId === boleto.id}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent"
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
                                 >
                                   {deletingId === boleto.id ? (
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
@@ -772,7 +772,7 @@ export default function FinanceiroPage() {
                 <h2 className="text-2xl font-bold text-gray-900">Recibos</h2>
                 <p className="text-gray-600">Gerencie todos os recibos emitidos</p>
               </div>
-              <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg">
+              <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg h-9 lg:h-12 text-sm lg:text-base">
                 <Plus className="h-4 w-4 mr-2" />
                 Novo Recibo
               </Button>
@@ -781,24 +781,26 @@ export default function FinanceiroPage() {
             {/* Recibos Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-blue-700">Total de Recibos</CardTitle>
-                  <DollarSign className="h-5 w-5 text-blue-600" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+                  <CardTitle className="text-xs lg:text-sm font-medium text-blue-700">Total de Recibos</CardTitle>
+                  <DollarSign className="h-3 w-3 lg:h-5 lg:w-5 text-blue-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-blue-800">{recibosStats.total}</div>
-                  <p className="text-xs text-blue-600 mt-1">Recibos emitidos</p>
+                <CardContent className="p-3 lg:p-6 pt-0">
+                  <div className="text-lg lg:text-3xl font-bold text-blue-800">{recibosStats.total}</div>
+                  <p className="text-[10px] lg:text-xs text-blue-600 mt-0.5 lg:mt-1">Recibos emitidos</p>
                 </CardContent>
               </Card>
 
               <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-green-700">Valor Total</CardTitle>
-                  <DollarSign className="h-5 w-5 text-green-600" />
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 lg:p-6 pb-1 lg:pb-2">
+                  <CardTitle className="text-xs lg:text-sm font-medium text-green-700">Valor Total</CardTitle>
+                  <DollarSign className="h-3 w-3 lg:h-5 lg:w-5 text-green-600" />
                 </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-800">{formatarValor(recibosStats.valorTotal)}</div>
-                  <p className="text-xs text-green-600 mt-1">Valor total dos recibos</p>
+                <CardContent className="p-3 lg:p-6 pt-0">
+                  <div className="text-lg lg:text-3xl font-bold text-green-800">
+                    {formatarValor(recibosStats.valorTotal)}
+                  </div>
+                  <p className="text-[10px] lg:text-xs text-green-600 mt-0.5 lg:mt-1">Valor total dos recibos</p>
                 </CardContent>
               </Card>
             </div>
@@ -838,7 +840,7 @@ export default function FinanceiroPage() {
                       {searchRecibos ? "Tente ajustar os termos de busca" : "Comece criando seu primeiro recibo"}
                     </p>
                     {!searchRecibos && (
-                      <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white">
+                      <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white h-9 lg:h-12 text-sm lg:text-base">
                         <Plus className="h-4 w-4 mr-2" />
                         Criar Primeiro Recibo
                       </Button>
@@ -885,14 +887,14 @@ export default function FinanceiroPage() {
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-transparent"
+                                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
                                 >
                                   <Eye className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 bg-transparent"
+                                  className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -901,7 +903,7 @@ export default function FinanceiroPage() {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent"
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 bg-transparent h-9 lg:h-12 text-sm lg:text-base"
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -975,7 +977,7 @@ export default function FinanceiroPage() {
             <AlertDialogCancel className="border-gray-200 hover:bg-gray-50">Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmarExclusao}
-              className="bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all duration-200"
+              className="bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all duration-200 h-9 lg:h-12 text-sm lg:text-base"
               disabled={deletingId !== null}
             >
               {deletingId !== null ? (
