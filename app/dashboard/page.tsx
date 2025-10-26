@@ -17,10 +17,12 @@ import {
   CheckCircle,
   Clock,
   Eye,
+  EyeOff,
   Plus,
   LucideContrast as FileContract,
   MoreHorizontal,
   ExternalLink,
+  Wrench,
 } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { canAccessRoute } from "@/lib/redirect-helper"
@@ -122,6 +124,7 @@ export default function DashboardPage() {
   const [recentItems, setRecentItems] = useState<RecentItem[]>([])
   const [loading, setLoading] = useState(true)
   const [logoMenu, setLogoMenu] = useState<string>("")
+  const [showValues, setShowValues] = useState(true)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -139,9 +142,28 @@ export default function DashboardPage() {
       }
     }
 
+    // Carregar preferência de exibição de valores do localStorage
+    const savedShowValues = localStorage.getItem("dashboard-show-values")
+    if (savedShowValues !== null) {
+      setShowValues(savedShowValues === "true")
+    }
+
     loadData()
     loadLogoMenu()
   }, [user, router])
+
+  const toggleShowValues = () => {
+    const newValue = !showValues
+    setShowValues(newValue)
+    localStorage.setItem("dashboard-show-values", String(newValue))
+  }
+
+  const formatValueOrHide = (value: number) => {
+    if (!showValues) {
+      return "R$ ••••••"
+    }
+    return formatCurrency(value)
+  }
 
   const loadLogoMenu = async () => {
     try {
@@ -308,22 +330,44 @@ export default function DashboardPage() {
   return (
     <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 animate-in fade-in duration-300">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6 lg:mb-8">
-        {logoMenu && (
-          <img
-            src={logoMenu || "/placeholder.svg"}
-            alt="Logo"
-            className="h-10 w-10 lg:h-12 lg:w-12 object-contain rounded-lg shadow-md bg-white p-1"
-          />
-        )}
-        <div>
-          <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-            Dashboard Executivo
-          </h1>
-          <p className="text-sm lg:text-base text-gray-600 mt-1">
-            Visão geral dos indicadores financeiros e operacionais
-          </p>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 lg:mb-8">
+        <div className="flex items-center gap-4">
+          {logoMenu && (
+            <img
+              src={logoMenu || "/placeholder.svg"}
+              alt="Logo"
+              className="h-10 w-10 lg:h-12 lg:w-12 object-contain rounded-lg shadow-md bg-white p-1"
+            />
+          )}
+          <div>
+            <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              Dashboard Executivo
+            </h1>
+            <p className="text-sm lg:text-base text-gray-600 mt-1">
+              Visão geral dos indicadores financeiros e operacionais
+            </p>
+          </div>
         </div>
+
+        {/* Botão de Ocultar/Mostrar Valores */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleShowValues}
+          className="flex items-center gap-2 bg-white hover:bg-gray-50 border-gray-300 shadow-sm"
+        >
+          {showValues ? (
+            <>
+              <EyeOff className="h-4 w-4" />
+              <span className="hidden sm:inline">Ocultar Valores</span>
+            </>
+          ) : (
+            <>
+              <Eye className="h-4 w-4" />
+              <span className="hidden sm:inline">Mostrar Valores</span>
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -357,7 +401,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-lg lg:text-2xl font-bold text-green-800">
-              {formatCurrency(stats.valorTotalBoletos)}
+              {formatValueOrHide(stats.valorTotalBoletos)}
             </div>
             <p className="text-xs text-green-600 mt-1">
               <span className="hidden lg:inline">{stats.totalBoletos} boletos emitidos</span>
@@ -373,7 +417,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-lg lg:text-2xl font-bold text-purple-800">
-              {formatCurrency(stats.valorTotalOrcamentos)}
+              {formatValueOrHide(stats.valorTotalOrcamentos)}
             </div>
             <p className="text-xs text-purple-600 mt-1">
               <span className="hidden lg:inline">
@@ -401,8 +445,8 @@ export default function DashboardPage() {
 
       {/* Recent Activity */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
-        {/* Atividade Recente */}
-        <Card className="border-0 shadow-lg bg-white">
+        {/* Atividade Recente - Oculta no mobile */}
+        <Card className="border-0 shadow-lg bg-white hidden md:block">
           <CardHeader className="p-4 lg:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
@@ -462,10 +506,16 @@ export default function DashboardPage() {
                           </div>
                         </TableCell>
                         <TableCell className="font-semibold text-green-600 text-xs lg:text-sm text-right p-2 lg:p-4">
-                          <span className="hidden sm:inline">{formatCurrency(item.valor)}</span>
-                          <span className="sm:hidden">
-                            {formatCurrency(item.valor).replace("R$", "R$").replace(".00", "")}
-                          </span>
+                          {showValues ? (
+                            <>
+                              <span className="hidden sm:inline">{formatCurrency(item.valor)}</span>
+                              <span className="sm:hidden">
+                                {formatCurrency(item.valor).replace("R$", "R$").replace(".00", "")}
+                              </span>
+                            </>
+                          ) : (
+                            <span>R$ ••••</span>
+                          )}
                         </TableCell>
                         <TableCell className="p-2 lg:p-4">{getStatusBadge(item.status, item.tipo)}</TableCell>
                         <TableCell className="text-xs text-gray-500 p-2 lg:p-4 hidden sm:table-cell">
@@ -508,6 +558,16 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="space-y-3 lg:space-y-4 p-4 lg:p-6">
             <div className="grid grid-cols-1 gap-2 lg:gap-3">
+              <Button
+                className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white justify-start h-10 lg:h-12 text-sm lg:text-base"
+                asChild
+              >
+                <Link href="/ordem-servico/nova">
+                  <Wrench className="h-4 w-4 mr-2 lg:mr-3" />
+                  Nova OS
+                </Link>
+              </Button>
+
               <Button
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white justify-start h-10 lg:h-12 text-sm lg:text-base"
                 asChild

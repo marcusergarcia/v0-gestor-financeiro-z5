@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import type { User } from "@/types/usuario"
 import { getFirstAvailableRoute } from "@/lib/redirect-helper"
 
@@ -27,6 +27,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     checkAuth()
@@ -73,19 +74,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json()
 
       if (data.success && data.user) {
-        localStorage.setItem("token", data.user.email) // Usar email como token simples
+        localStorage.setItem("token", data.user.email)
         localStorage.setItem("user", JSON.stringify(data.user))
         setUser(data.user)
 
-        // Pequeno delay para garantir que o estado foi atualizado
-        await new Promise((resolve) => setTimeout(resolve, 100))
-
-        // Redirecionar para a primeira rota com permissão
+        // Redirecionar para a primeira rota com permissão usando router.replace
         const firstRoute = getFirstAvailableRoute(data.user)
         console.log("Redirecionando para:", firstRoute)
 
-        // Usar window.location para garantir um refresh completo
-        window.location.href = firstRoute
+        // Usar replace em vez de window.location para evitar recarregar a página
+        router.replace(firstRoute)
 
         return { success: true }
       } else {
@@ -101,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("token")
     localStorage.removeItem("user")
     setUser(null)
-    window.location.href = "/login"
+    router.replace("/login")
   }
 
   return <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>

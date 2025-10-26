@@ -1,3 +1,10 @@
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/contexts/auth-context"
+import { Skeleton } from "@/components/ui/skeleton"
+import { getFirstAvailableRoute } from "@/lib/redirect-helper"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -15,7 +22,41 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
-export default function HomePage() {
+export default function Home() {
+  const router = useRouter()
+  const { user, loading } = useAuth()
+
+  useEffect(() => {
+    if (!loading) {
+      if (user) {
+        // Redirecionar para a primeira rota disponível
+        const firstRoute = getFirstAvailableRoute(user)
+        router.replace(firstRoute)
+      } else {
+        // Se não estiver autenticado, redirecionar para login
+        router.replace("/login")
+      }
+    }
+  }, [user, loading, router])
+
+  // Mostrar loading enquanto verifica autenticação
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="h-16 w-16 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+          </div>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-48 mx-auto" />
+            <Skeleton className="h-4 w-64 mx-auto" />
+          </div>
+          <p className="text-sm text-gray-600">Carregando sistema...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}

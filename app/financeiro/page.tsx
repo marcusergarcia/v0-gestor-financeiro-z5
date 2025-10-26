@@ -17,6 +17,7 @@ import {
   Search,
   Plus,
   Eye,
+  EyeOff,
   Edit,
   Trash2,
   Filter,
@@ -85,11 +86,17 @@ export default function FinanceiroPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [boletoParaExcluir, setBoletoParaExcluir] = useState<Boleto | null>(null)
   const [deletingId, setDeletingId] = useState<number | null>(null)
+  const [valoresOcultos, setValoresOcultos] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
     loadData()
     loadLogoMenu()
+    // Carregar preferência de valores ocultos do localStorage
+    const savedPreference = localStorage.getItem("financeiro-valores-ocultos")
+    if (savedPreference) {
+      setValoresOcultos(savedPreference === "true")
+    }
   }, [])
 
   const loadLogoMenu = async () => {
@@ -139,6 +146,19 @@ export default function FinanceiroPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const toggleValoresOcultos = () => {
+    const novoEstado = !valoresOcultos
+    setValoresOcultos(novoEstado)
+    localStorage.setItem("financeiro-valores-ocultos", novoEstado.toString())
+  }
+
+  const formatarValor = (valor: number) => {
+    if (valoresOcultos) {
+      return "R$ ••••••"
+    }
+    return formatCurrency(valor)
   }
 
   const handleVisualizarBoleto = (boleto: Boleto) => {
@@ -428,20 +448,41 @@ export default function FinanceiroPage() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        {logoMenu && (
-          <img
-            src={logoMenu || "/placeholder.svg"}
-            alt="Logo"
-            className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
-          />
-        )}
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-            Gestão Financeira
-          </h1>
-          <p className="text-gray-600 mt-1">Controle de boletos e recibos</p>
+      <div className="flex items-center justify-between gap-4 mb-8">
+        <div className="flex items-center gap-4">
+          {logoMenu && (
+            <img
+              src={logoMenu || "/placeholder.svg"}
+              alt="Logo"
+              className="h-12 w-12 object-contain rounded-lg shadow-md bg-white p-1"
+            />
+          )}
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+              Gestão Financeira
+            </h1>
+            <p className="text-gray-600 mt-1">Controle de boletos e recibos</p>
+          </div>
         </div>
+
+        {/* Botão de Toggle de Valores */}
+        <Button
+          onClick={toggleValoresOcultos}
+          variant="outline"
+          className="flex items-center gap-2 border-2 hover:bg-gray-50 transition-all duration-200 bg-transparent"
+        >
+          {valoresOcultos ? (
+            <>
+              <EyeOff className="h-5 w-5 text-gray-600" />
+              <span className="hidden sm:inline font-medium">Mostrar Valores</span>
+            </>
+          ) : (
+            <>
+              <Eye className="h-5 w-5 text-gray-600" />
+              <span className="hidden sm:inline font-medium">Ocultar Valores</span>
+            </>
+          )}
+        </Button>
       </div>
 
       {/* Stats Cards - Agora clicáveis */}
@@ -458,7 +499,7 @@ export default function FinanceiroPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-blue-800">{boletosStatsTotais.total}</div>
-            <p className="text-xs text-blue-600 mt-1">{formatCurrency(boletosStatsTotais.valorTotal)}</p>
+            <p className="text-xs text-blue-600 mt-1">{formatarValor(boletosStatsTotais.valorTotal)}</p>
           </CardContent>
         </Card>
 
@@ -475,7 +516,7 @@ export default function FinanceiroPage() {
           <CardContent>
             <div className="text-3xl font-bold text-green-800">{boletosStatsTotais.pagos}</div>
             <p className="text-xs text-green-600 mt-1">
-              {formatCurrency(
+              {formatarValor(
                 boletos
                   .filter((b) => b.status === "pago")
                   .reduce((acc, b) => acc + (typeof b.valor === "number" ? b.valor : 0), 0),
@@ -663,7 +704,7 @@ export default function FinanceiroPage() {
                               <div className="font-medium text-gray-900">{boleto.cliente_nome}</div>
                             </TableCell>
                             <TableCell>
-                              <div className="font-semibold text-green-600">{formatCurrency(boleto.valor)}</div>
+                              <div className="font-semibold text-green-600">{formatarValor(boleto.valor)}</div>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
@@ -756,7 +797,7 @@ export default function FinanceiroPage() {
                   <DollarSign className="h-5 w-5 text-green-600" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-green-800">{formatCurrency(recibosStats.valorTotal)}</div>
+                  <div className="text-2xl font-bold text-green-800">{formatarValor(recibosStats.valorTotal)}</div>
                   <p className="text-xs text-green-600 mt-1">Valor total dos recibos</p>
                 </CardContent>
               </Card>
@@ -831,7 +872,7 @@ export default function FinanceiroPage() {
                               <div className="max-w-xs truncate">{recibo.descricao}</div>
                             </TableCell>
                             <TableCell>
-                              <div className="font-semibold text-green-600">{formatCurrency(recibo.valor)}</div>
+                              <div className="font-semibold text-green-600">{formatarValor(recibo.valor)}</div>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
