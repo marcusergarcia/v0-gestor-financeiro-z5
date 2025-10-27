@@ -425,7 +425,7 @@ export default function ProdutosPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="flex-1 space-y-4 p-4 pt-6">
+      <div className="flex-1 space-y-4 p-4 pt-6 pb-24 md:pb-6">
         <div className="flex items-center gap-4 mb-8">
           {logoMenu && (
             <img
@@ -443,7 +443,8 @@ export default function ProdutosPage() {
         </div>
 
         <Tabs defaultValue="produtos" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 bg-white shadow-lg rounded-lg p-1">
+          {/* Desktop: TabsList normal */}
+          <TabsList className="hidden md:grid w-full grid-cols-4 bg-white shadow-lg rounded-lg p-1">
             <TabsTrigger
               value="produtos"
               className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white"
@@ -473,6 +474,40 @@ export default function ProdutosPage() {
               Marcas
             </TabsTrigger>
           </TabsList>
+
+          {/* Mobile: Grid 4x1 fixo no rodapé */}
+          <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-2xl">
+            <TabsList className="grid grid-cols-4 w-full h-auto p-2 gap-1 bg-gradient-to-r from-green-50 to-blue-50">
+              <TabsTrigger
+                value="produtos"
+                className="flex flex-col items-center gap-1 py-3 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white rounded"
+              >
+                <Package className="h-5 w-5" />
+                <span>Produtos</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="servicos"
+                className="flex flex-col items-center gap-1 py-3 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white rounded"
+              >
+                <Wrench className="h-5 w-5" />
+                <span>Serviços</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="categorias"
+                className="flex flex-col items-center gap-1 py-3 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded"
+              >
+                <Tag className="h-5 w-5" />
+                <span>Categorias</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="marcas"
+                className="flex flex-col items-center gap-1 py-3 text-[10px] data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded"
+              >
+                <Award className="h-5 w-5" />
+                <span>Marcas</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="produtos" className="space-y-4">
             <Card className="border-0 shadow-lg bg-white">
