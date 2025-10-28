@@ -81,6 +81,7 @@ export default function NovoOrcamentoPage() {
 
   const [parcelamentoMdo, setParcelamentoMdo] = useState(1)
   const [parcelamentoMaterial, setParcelamentoMaterial] = useState(1)
+  const [materialAVista, setMaterialAVista] = useState(false)
 
   const [valorPorKm, setValorPorKm] = useState(1.5)
   const [dataOrcamento, setDataOrcamento] = useState(new Date().toISOString().split("T")[0])
@@ -429,7 +430,7 @@ export default function NovoOrcamentoPage() {
   }
 
   const calcularValorJuros = () => {
-    if (parcelamentoMaterial === 0) return 0
+    if (materialAVista || parcelamentoMaterial === 0) return 0
     return ((parcelamentoMdo + parcelamentoMaterial - 1) * jurosAm * calcularValorMaterial()) / 100
   }
 
@@ -438,6 +439,7 @@ export default function NovoOrcamentoPage() {
   }
 
   const calcularTaxaBoletoMaterial = () => {
+    if (materialAVista) return valorBoleto
     if (parcelamentoMaterial === 0) return 0
     return parcelamentoMaterial * valorBoleto
   }
@@ -453,7 +455,7 @@ export default function NovoOrcamentoPage() {
   }
 
   const calcularImpostoMaterialValor = () => {
-    if (parcelamentoMaterial === 0) return 0
+    if (parcelamentoMaterial === 0 && !materialAVista) return 0
     const base = calcularValorMaterial() + calcularValorJuros() + calcularTaxaBoletoMaterial()
     return (base * impostoMaterial) / 100
   }
@@ -469,7 +471,7 @@ export default function NovoOrcamentoPage() {
   }
 
   const calcularSubtotalMaterial = () => {
-    if (parcelamentoMaterial === 0) return 0
+    if (parcelamentoMaterial === 0 && !materialAVista) return 0
     return (
       calcularValorMaterial() + calcularValorJuros() + calcularTaxaBoletoMaterial() + calcularImpostoMaterialValor()
     )
@@ -580,7 +582,8 @@ export default function NovoOrcamentoPage() {
         desconto_mdo_percent: descontoMdoPercent,
         desconto_mdo_valor: calcularDescontoMdoValor(),
         parcelamento_mdo: parcelamentoMdo,
-        parcelamento_material: parcelamentoMaterial,
+        parcelamento_material: materialAVista ? 1 : parcelamentoMaterial,
+        material_a_vista: materialAVista,
         custo_deslocamento: calcularCustoDeslocamento(),
         valor_juros: calcularValorJuros(),
         taxa_boleto_mdo: calcularTaxaBoletoMdo(),
@@ -1213,13 +1216,21 @@ export default function NovoOrcamentoPage() {
                         <Input
                           id="parcelamento_mdo"
                           type="number"
-                          min="1"
+                          min="0" // Changed from 1 to 0 to allow for "Sem cobrança"
                           value={parcelamentoMdo}
-                          onChange={(e) => setParcelamentoMdo(Number.parseInt(e.target.value) || 1)}
+                          onChange={(e) => setParcelamentoMdo(Number.parseInt(e.target.value) || 0)}
                           className="text-sm"
                         />
                         <div className="text-xs text-gray-500 mt-1">
-                          {parcelamentoMdo === 1 ? "À vista" : `${parcelamentoMdo}x`}
+                          {parcelamentoMdo === 0
+                            ? "Sem cobrança"
+                            : parcelamentoMdo === 1
+                              ? "À vista"
+                              : parcelamentoMdo === 2
+                                ? "À vista + 30dd"
+                                : parcelamentoMdo === 3
+                                  ? "À vista + 30dd + 60dd"
+                                  : `À vista + ${parcelamentoMdo - 1}x 30dd`}
                         </div>
                       </div>
                       <div>
@@ -1233,13 +1244,33 @@ export default function NovoOrcamentoPage() {
                           value={parcelamentoMaterial}
                           onChange={(e) => setParcelamentoMaterial(Number.parseInt(e.target.value) || 0)}
                           className="text-sm"
+                          disabled={materialAVista}
                         />
                         <div className="text-xs text-gray-500 mt-1">
-                          {parcelamentoMaterial === 0
-                            ? "Sem cobrança"
-                            : parcelamentoMaterial === 1
-                              ? "À vista"
-                              : `${parcelamentoMaterial}x`}
+                          {materialAVista
+                            ? "À vista"
+                            : parcelamentoMaterial === 0
+                              ? "Sem cobrança"
+                              : parcelamentoMaterial === 1
+                                ? "À vista"
+                                : `${parcelamentoMaterial}x`}
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <input
+                            type="checkbox"
+                            id="material_a_vista"
+                            checked={materialAVista}
+                            onChange={(e) => {
+                              setMaterialAVista(e.target.checked)
+                              if (e.target.checked) {
+                                setParcelamentoMaterial(1)
+                              }
+                            }}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          />
+                          <Label htmlFor="material_a_vista" className="text-xs cursor-pointer">
+                            Material à vista
+                          </Label>
                         </div>
                       </div>
                     </div>
@@ -1253,7 +1284,26 @@ export default function NovoOrcamentoPage() {
 
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">Mão de Obra:</span>
-                      <span className="font-medium">{formatCurrency(calcularValorMaoObra())}</span>
+                      <span className="font-medium text-blue-600">
+                        {parcelamentoMdo === 0
+                          ? "Sem cobrança"
+                          : parcelamentoMdo === 1
+                            ? `À vista - ${formatCurrency(calcularSubtotalMdo())}`
+                            : `${parcelamentoMdo}x de ${formatCurrency(calcularSubtotalMdo() / parcelamentoMdo)}`}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Material:</span>
+                      <span className="font-medium text-blue-600">
+                        {materialAVista
+                          ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
+                          : parcelamentoMaterial === 0
+                            ? "Sem cobrança"
+                            : parcelamentoMaterial === 1
+                              ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
+                              : `${parcelamentoMaterial}x de ${formatCurrency(calcularSubtotalMaterial() / parcelamentoMaterial)}`}
+                      </span>
                     </div>
 
                     <div className="flex justify-between items-center">
