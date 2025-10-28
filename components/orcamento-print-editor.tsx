@@ -212,6 +212,7 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
   const gerarTextoParcelamento = () => {
     const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
     const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material) || 1
+    const materialAVista = orcamento.material_a_vista === true || orcamento.material_a_vista === 1
     const subtotalMdo = calcularSubtotalMdo()
     const subtotalMaterial = calcularSubtotalMaterial()
 
@@ -220,18 +221,37 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
 
     let texto = "Parcelamento: "
 
-    if (parcelamentoMdo === 1) {
+    if (parcelamentoMdo === 0) {
+      texto += "Mão de Obra: Sem cobrança"
+    } else if (parcelamentoMdo === 1) {
       texto += `Mão de Obra: À vista ${formatCurrency(subtotalMdo)}`
     } else {
-      texto += `Mão de Obra: ${parcelamentoMdo}x ${formatCurrency(valorParcelaMdo)}`
+      // Generate payment schedule starting from cash (0dd), then 30dd, 60dd, etc.
+      const parcelasMdo = []
+      for (let i = 0; i < parcelamentoMdo; i++) {
+        parcelasMdo.push(i === 0 ? "À vista" : `${i * 30}dd`)
+      }
+      texto += `Mão de Obra: ${parcelamentoMdo}x ${formatCurrency(valorParcelaMdo)} (${parcelasMdo.join(", ")})`
     }
 
     texto += " e "
 
-    if (parcelamentoMaterial === 1) {
+    if (materialAVista) {
       texto += `Material: À vista ${formatCurrency(subtotalMaterial)}`
+    } else if (parcelamentoMaterial === 0) {
+      texto += "Material: Sem cobrança"
+    } else if (parcelamentoMaterial === 1) {
+      // Material starts after last MDO payment
+      const inicioMaterial = parcelamentoMdo * 30
+      texto += `Material: ${inicioMaterial}dd ${formatCurrency(subtotalMaterial)}`
     } else {
-      texto += `Material: ${parcelamentoMaterial}x ${formatCurrency(valorParcelaMaterial)}`
+      // Material starts after the last MDO payment
+      const inicioMaterial = parcelamentoMdo * 30
+      const parcelasMaterial = []
+      for (let i = 0; i < parcelamentoMaterial; i++) {
+        parcelasMaterial.push(`${inicioMaterial + i * 30}dd`)
+      }
+      texto += `Material: ${parcelamentoMaterial}x ${formatCurrency(valorParcelaMaterial)} (${parcelasMaterial.join(", ")})`
     }
 
     return texto
@@ -501,6 +521,37 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
     const subtotalMaterial = calcularSubtotalMaterial()
     const textoParcelamento = gerarTextoParcelamento()
 
+    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
+    const parcelamentoMaterial = safeNumber(orcamento.parcelamento_material) || 1
+    const materialAVista = orcamento.material_a_vista === true || orcamento.material_a_vista === 1
+
+    let textoMdo = "À vista"
+    if (parcelamentoMdo === 0) {
+      textoMdo = "Sem cobrança"
+    } else if (parcelamentoMdo > 1) {
+      const parcelasMdo = []
+      for (let i = 0; i < parcelamentoMdo; i++) {
+        parcelasMdo.push(i === 0 ? "À vista" : `${i * 30}dd`)
+      }
+      textoMdo = `${parcelamentoMdo}x (${parcelasMdo.join(", ")})`
+    }
+
+    const inicioMaterial = parcelamentoMdo * 30
+    let textoMaterial = "À vista"
+    if (materialAVista) {
+      textoMaterial = "À vista"
+    } else if (parcelamentoMaterial === 0) {
+      textoMaterial = "Sem cobrança"
+    } else if (parcelamentoMaterial === 1) {
+      textoMaterial = `${inicioMaterial}dd`
+    } else {
+      const parcelasMaterial = []
+      for (let i = 0; i < parcelamentoMaterial; i++) {
+        parcelasMaterial.push(`${inicioMaterial + i * 30}dd`)
+      }
+      textoMaterial = `${parcelamentoMaterial}x (${parcelasMaterial.join(", ")})`
+    }
+
     tabelaProdutosHTML += `
 <div style="margin-top: 6px;">
   ${descontoPercent > 0 ? `<p style="color: #dc2626; font-weight: bold; margin-bottom: 2px; font-size: 12px;">Desconto (${descontoPercent.toFixed(2)}%): - ${formatCurrency(descontoValor)}</p>` : ""}
@@ -518,8 +569,8 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
     <div style="padding-right: 6px;">
       <p style="margin-bottom: 2px;"><strong>Validade:</strong> ${calcularDataValidade()}</p>
       ${orcamento.prazo_dias ? `<p style="margin-bottom: 2px;"><strong>Prazo:</strong> ${orcamento.prazo_dias} dias úteis</p>` : ""}
-      <p style="margin-bottom: 2px;"><strong>Mão de obra:</strong> À vista${(safeNumber(orcamento.parcelamento_mdo) || 1) > 1 ? `, ${orcamento.parcelamento_mdo}x` : ""}</p>
-      <p style="margin-bottom: 2px;"><strong>Material:</strong> ${(safeNumber(orcamento.parcelamento_material) || 1) === 1 ? "À vista" : `${orcamento.parcelamento_material}x`}</p>
+      <p style="margin-bottom: 2px;"><strong>Mão de obra:</strong> ${textoMdo}</p>
+      <p style="margin-bottom: 2px;"><strong>Material:</strong> ${textoMaterial}</p>
       <p style="margin-bottom: 2px;"><strong>Garantia:</strong> 90d serviços / 180d materiais</p>
       <p style="margin-bottom: 0;"><strong>Não inclui:</strong> Obras civis, pintura, limpeza</p>
     </div>

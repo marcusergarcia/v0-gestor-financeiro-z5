@@ -79,6 +79,9 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
 
   const [parcelamentoMdo, setParcelamentoMdo] = useState(orcamento.parcelamento_mdo || 1)
   const [parcelamentoMaterial, setParcelamentoMaterial] = useState(orcamento.parcelamento_material || 1)
+  const [materialAVista, setMaterialAVista] = useState(
+    orcamento.material_a_vista === true || orcamento.material_a_vista === 1,
+  )
 
   const [valorPorKm, setValorPorKm] = useState(1.5)
   const [dataOrcamento, setDataOrcamento] = useState(
@@ -578,7 +581,8 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
         desconto_mdo_percent: descontoMdoPercent,
         desconto_mdo_valor: descontoMdoValor,
         parcelamento_mdo: parcelamentoMdo,
-        parcelamento_material: parcelamentoMaterial,
+        parcelamento_material: materialAVista ? 1 : parcelamentoMaterial,
+        material_a_vista: materialAVista,
         custo_deslocamento: custoDeslocamento,
         valor_juros: valorJuros,
         taxa_boleto_mdo: taxaBoletoMdo,
@@ -1179,13 +1183,21 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
                       <Input
                         id="parcelamento_mdo"
                         type="number"
-                        min="1"
+                        min="0"
                         value={parcelamentoMdo}
-                        onChange={(e) => setParcelamentoMdo(Number.parseInt(e.target.value) || 1)}
+                        onChange={(e) => setParcelamentoMdo(Number.parseInt(e.target.value) || 0)}
                         className="text-sm"
                       />
                       <div className="text-xs text-gray-500 mt-1">
-                        {parcelamentoMdo === 1 ? "À vista" : `${parcelamentoMdo}x`}
+                        {parcelamentoMdo === 0
+                          ? "Sem cobrança"
+                          : parcelamentoMdo === 1
+                            ? "À vista"
+                            : parcelamentoMdo === 2
+                              ? "À vista + 30dd"
+                              : parcelamentoMdo === 3
+                                ? "À vista + 30dd + 60dd"
+                                : `À vista + ${parcelamentoMdo - 1}x 30dd`}
                       </div>
                     </div>
                     <div>
@@ -1199,13 +1211,30 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
                         value={parcelamentoMaterial}
                         onChange={(e) => setParcelamentoMaterial(Number.parseInt(e.target.value) || 0)}
                         className="text-sm"
+                        disabled={materialAVista}
                       />
                       <div className="text-xs text-gray-500 mt-1">
-                        {parcelamentoMaterial === 0
-                          ? "Sem cobrança"
-                          : parcelamentoMaterial === 1
-                            ? "À vista"
-                            : `${parcelamentoMaterial}x`}
+                        {materialAVista
+                          ? "À vista"
+                          : parcelamentoMaterial === 0
+                            ? "Sem cobrança"
+                            : parcelamentoMaterial === 1
+                              ? "1x"
+                              : `${parcelamentoMaterial}x`}
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <input
+                          type="checkbox"
+                          id="material_a_vista"
+                          checked={materialAVista}
+                          onChange={(e) => {
+                            setMaterialAVista(e.target.checked)
+                          }}
+                          className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <Label htmlFor="material_a_vista" className="text-xs cursor-pointer">
+                          Material à vista
+                        </Label>
                       </div>
                     </div>
                   </div>
@@ -1274,25 +1303,29 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
                   <div className="border-t pt-4">
                     <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-blue-600" />
-                      Parcelamento
+                      Forma de Pagamento
                     </h4>
                     <div className="space-y-2">
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-600">Mão de Obra:</span>
                         <span className="font-medium text-blue-600">
-                          {parcelamentoMdo === 1
-                            ? `À vista - ${formatCurrency(calcularSubtotalMdo())}`
-                            : `${parcelamentoMdo}x de ${formatCurrency(calcularSubtotalMdo() / parcelamentoMdo)}`}
+                          {parcelamentoMdo === 0
+                            ? "Sem cobrança"
+                            : parcelamentoMdo === 1
+                              ? `À vista - ${formatCurrency(calcularSubtotalMdo())}`
+                              : `${parcelamentoMdo}x de ${formatCurrency(calcularSubtotalMdo() / parcelamentoMdo)}`}
                         </span>
                       </div>
                       <div className="flex justify-between items-center text-sm">
                         <span className="text-gray-600">Material:</span>
                         <span className="font-medium text-blue-600">
-                          {parcelamentoMaterial === 0
-                            ? "Sem cobrança"
-                            : parcelamentoMaterial === 1
-                              ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
-                              : `${parcelamentoMaterial}x de ${formatCurrency(calcularSubtotalMaterial() / parcelamentoMaterial)}`}
+                          {materialAVista
+                            ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
+                            : parcelamentoMaterial === 0
+                              ? "Sem cobrança"
+                              : parcelamentoMaterial === 1
+                                ? `1x - ${formatCurrency(calcularSubtotalMaterial())}`
+                                : `${parcelamentoMaterial}x de ${formatCurrency(calcularSubtotalMaterial() / parcelamentoMaterial)}`}
                         </span>
                       </div>
                     </div>
