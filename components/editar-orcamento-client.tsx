@@ -175,6 +175,7 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
               valor_unitario: Number(item.valor_unitario),
               valor_mao_obra: Number(item.valor_mao_obra),
               ncm: produtoNcm,
+              marca: marcaNome, // Add marca to produto object
             },
             quantidade: Number(item.quantidade),
             valor_unitario: Number(item.valor_unitario),
@@ -212,6 +213,7 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
         produto: {
           ...produto,
           ncm: produtoNcm,
+          marca: marcaNome, // Add marca to produto object
         },
         quantidade: 1,
         valor_unitario: produto.valor_unitario,
@@ -310,6 +312,8 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
                   descricao: produtoAtualizado.nome || produtoAtualizado.descricao,
                   valor_unitario: novoValorUnitario,
                   valor_mao_obra: novoValorMaoObra,
+                  ncm: produtoNcm,
+                  marca: marcaNome,
                 },
                 valor_unitario: novoValorUnitario,
                 valor_mao_obra: novoValorMaoObra,
@@ -1408,9 +1412,21 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
         <OrcamentoPrintEditor
           orcamento={{
             ...orcamento,
-            itens: itens,
+            itens: itens.map((item) => ({
+              ...item,
+              produto_descricao: item.produto?.descricao || item.produto_descricao,
+              produto_codigo: item.produto?.codigo || item.produto_codigo,
+              produto_unidade: item.produto?.unidade || item.produto_unidade,
+              marca_nome: item.marca_nome || item.produto?.marca,
+            })),
           }}
-          itens={itens}
+          itens={itens.map((item) => ({
+            ...item,
+            produto_descricao: item.produto?.descricao || item.produto_descricao,
+            produto_codigo: item.produto?.codigo || item.produto_codigo,
+            produto_unidade: item.produto?.unidade || item.produto_unidade,
+            marca_nome: item.marca_nome || item.produto?.marca,
+          }))}
           onClose={() => setShowPrintModal(false)}
         />
       )}
