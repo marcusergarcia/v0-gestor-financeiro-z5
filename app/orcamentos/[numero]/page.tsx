@@ -98,6 +98,7 @@ interface Orcamento {
   desconto_mdo_valor?: number
   parcelamento_mdo?: number
   parcelamento_material?: number
+  material_a_vista?: boolean
 }
 
 export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ numero: string }> }) {
@@ -716,15 +717,21 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
                       <div className="text-center p-2 bg-blue-50 rounded">
                         <div className="text-sm text-gray-600">MDO</div>
                         <div className="font-semibold text-blue-600">
-                          {(orcamento.parcelamento_mdo || 1) === 1 ? "À vista" : `${orcamento.parcelamento_mdo}x`}
+                          {(orcamento.parcelamento_mdo || 1) === 0
+                            ? "Sem cobrança"
+                            : (orcamento.parcelamento_mdo || 1) === 1
+                              ? "À vista"
+                              : `${orcamento.parcelamento_mdo}x`}
                         </div>
                       </div>
                       <div className="text-center p-2 bg-green-50 rounded">
                         <div className="text-sm text-gray-600">Material</div>
                         <div className="font-semibold text-green-600">
-                          {(orcamento.parcelamento_material || 1) === 1
-                            ? "À vista"
-                            : `${orcamento.parcelamento_material}x`}
+                          {(orcamento.parcelamento_material || 1) === 0
+                            ? "Sem cobrança"
+                            : (orcamento.parcelamento_material || 1) === 1 && !orcamento.material_a_vista
+                              ? "30dd"
+                              : `${orcamento.parcelamento_material}x`}
                         </div>
                       </div>
                     </div>
@@ -800,18 +807,24 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-blue-700 font-medium">Mão de Obra:</span>
                           <span className="font-semibold text-blue-800">
-                            {(orcamento.parcelamento_mdo || 1) === 1
-                              ? `À vista - ${formatCurrency(calcularSubtotalMdo())}`
-                              : `${orcamento.parcelamento_mdo}x de ${formatCurrency(calcularSubtotalMdo() / (orcamento.parcelamento_mdo || 1))}`}
+                            {(orcamento.parcelamento_mdo || 1) === 0
+                              ? "Sem cobrança"
+                              : (orcamento.parcelamento_mdo || 1) === 1
+                                ? `À vista - ${formatCurrency(calcularSubtotalMdo())}`
+                                : `${orcamento.parcelamento_mdo}x de ${formatCurrency(calcularSubtotalMdo() / (orcamento.parcelamento_mdo || 1))}`}
                           </span>
                         </div>
 
                         <div className="flex justify-between items-center text-sm">
                           <span className="text-green-700 font-medium">Material:</span>
                           <span className="font-semibold text-green-800">
-                            {(orcamento.parcelamento_material || 1) === 1
+                            {orcamento.material_a_vista
                               ? `À vista - ${formatCurrency(calcularSubtotalMaterial())}`
-                              : `${orcamento.parcelamento_material}x de ${formatCurrency(calcularSubtotalMaterial() / (orcamento.parcelamento_material || 1))}`}
+                              : (orcamento.parcelamento_material || 1) === 0
+                                ? "Sem cobrança"
+                                : (orcamento.parcelamento_material || 1) === 1
+                                  ? `30dd - ${formatCurrency(calcularSubtotalMaterial())}`
+                                  : `${orcamento.parcelamento_material}x de ${formatCurrency(calcularSubtotalMaterial() / (orcamento.parcelamento_material || 1))}`}
                           </span>
                         </div>
                       </div>
