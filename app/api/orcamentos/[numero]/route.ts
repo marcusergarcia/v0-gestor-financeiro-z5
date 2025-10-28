@@ -1,96 +1,54 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
-import { generateUUID } from "@/lib/utils"
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest, { params }: { params: { numero: string } }) {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const situacao = searchParams.get("situacao")
+    const { numero } = params
 
-    let orcamentosQuery = `
+    const orcamentoQuery = `
       SELECT 
-        o.id,
-        o.numero,
-        o.cliente_id,
-        o.tipo_servico,
-        o.detalhes_servico,
-        o.valor_material,
-        o.valor_mao_obra,
-        o.desconto,
-        o.valor_total,
-        o.validade,
-        o.observacoes,
-        o.situacao,
-        DATE_FORMAT(o.data_orcamento, '%Y-%m-%d') as data_orcamento,
-        DATE_FORMAT(o.data_inicio, '%Y-%m-%d') as data_inicio,
-        DATE_FORMAT(o.created_at, '%Y-%m-%d %H:%i:%s') as created_at,
-        DATE_FORMAT(o.updated_at, '%Y-%m-%d %H:%i:%s') as updated_at,
-        o.distancia_km,
-        o.valor_boleto,
-        o.prazo_dias,
-        o.juros_am,
-        o.imposto_servico,
-        o.imposto_material,
-        o.desconto_mdo_percent,
-        o.desconto_mdo_valor,
-        o.parcelamento_mdo,
-        o.parcelamento_material,
+        o.*,
         c.nome as cliente_nome,
         c.codigo as cliente_codigo,
         c.cnpj as cliente_cnpj,
         c.cpf as cliente_cpf,
-        c.tem_contrato
+        c.endereco as cliente_endereco,
+        c.bairro as cliente_bairro,
+        c.cidade as cliente_cidade,
+        c.estado as cliente_estado,
+        c.cep as cliente_cep,
+        c.email as cliente_email,
+        c.telefone as cliente_telefone,
+        c.distancia_km as cliente_distancia_km,
+        c.nome_adm as cliente_nome_adm,
+        c.contato_adm as cliente_contato_adm,
+        c.telefone_adm as cliente_telefone_adm,
+        c.email_adm as cliente_email_adm
       FROM orcamentos o
       LEFT JOIN clientes c ON o.cliente_id = c.id
+      WHERE o.numero = ?
     `
 
-    const params: any[] = []
+    const orcamentos = await query(orcamentoQuery, [numero])
 
-    if (situacao) {
-      orcamentosQuery += " WHERE o.situacao = ?"
-      params.push(situacao)
+    if (!orcamentos || orcamentos.length === 0) {
+      return NextResponse.json({ success: false, message: "Orçamento não encontrado" }, { status: 404 })
     }
-
-    orcamentosQuery += " ORDER BY o.created_at DESC"
-
-    const orcamentos = await query(orcamentosQuery, params)
 
     return NextResponse.json({
       success: true,
-      data: orcamentos || [],
+      data: orcamentos[0],
     })
   } catch (error) {
-    console.error("Erro ao buscar orçamentos:", error)
+    console.error("Erro ao buscar orçamento:", error)
     return NextResponse.json({ success: false, message: "Erro interno do servidor" }, { status: 500 })
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function PUT(request: NextRequest, { params }: { params: { numero: string } }) {
   try {
+    const { numero } = params
     const data = await request.json()
-
-    // Gerar número do orçamento
-    const dataAtual = new Date()
-    const ano = dataAtual.getFullYear()
-    const mes = String(dataAtual.getMonth() + 1).padStart(2, "0")
-    const dia = String(dataAtual.getDate()).padStart(2, "0")
-
-    const ultimoOrcamentoQuery = `
-      SELECT numero FROM orcamentos 
-      WHERE numero LIKE '${ano}${mes}${dia}%' 
-      ORDER BY numero DESC 
-      LIMIT 1
-    `
-
-    const ultimosOrcamentos = await query(ultimoOrcamentoQuery)
-    let sequencial = 1
-
-    if (ultimosOrcamentos && ultimosOrcamentos.length > 0) {
-      const ultimoNumero = ultimosOrcamentos[0].numero
-      sequencial = Number.parseInt(ultimoNumero.slice(-3)) + 1
-    }
-
-    const numero = `${ano}${mes}${dia}${String(sequencial).padStart(3, "0")}`
 
     // Formatar data para MySQL (YYYY-MM-DD)
     const formatDateForMySQL = (dateString: string | null | undefined): string | null => {
@@ -115,43 +73,45 @@ export async function POST(request: NextRequest) {
     const dataOrcamentoFormatada = formatDateForMySQL(data.data_orcamento)
     const dataInicioFormatada = formatDateForMySQL(data.data_inicio)
 
-    // Inserir orçamento - AJUSTADO para corresponder exatamente à estrutura da tabela
-    const insertQuery = `
-      INSERT INTO orcamentos (
-        id,
-        numero,
-        cliente_id,
-        tipo_servico,
-        detalhes_servico,
-        valor_material,
-        valor_mao_obra,
-        desconto,
-        valor_total,
-        validade,
-        observacoes,
-        situacao,
-        data_orcamento,
-        data_inicio,
-        distancia_km,
-        valor_boleto,
-        prazo_dias,
-        juros_am,
-        imposto_servico,
-        imposto_material,
-        desconto_mdo_percent,
-        desconto_mdo_valor,
-        parcelamento_mdo,
-        parcelamento_material,
-        material_a_vista,
-        created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    // Atualizar orçamento
+    const updateQuery = `
+      UPDATE orcamentos SET
+        cliente_id = ?,
+        tipo_servico = ?,
+        detalhes_servico = ?,
+        valor_material = ?,
+        valor_mao_obra = ?,
+        desconto = ?,
+        valor_total = ?,
+        validade = ?,
+        observacoes = ?,
+        situacao = ?,
+        data_orcamento = ?,
+        data_inicio = ?,
+        distancia_km = ?,
+        valor_boleto = ?,
+        prazo_dias = ?,
+        juros_am = ?,
+        imposto_servico = ?,
+        imposto_material = ?,
+        desconto_mdo_percent = ?,
+        desconto_mdo_valor = ?,
+        parcelamento_mdo = ?,
+        parcelamento_material = ?,
+        material_a_vista = ?,
+        custo_deslocamento = ?,
+        valor_juros = ?,
+        taxa_boleto_mdo = ?,
+        taxa_boleto_material = ?,
+        valor_imposto_servico = ?,
+        valor_imposto_material = ?,
+        subtotal_mdo = ?,
+        subtotal_material = ?,
+        updated_at = NOW()
+      WHERE numero = ?
     `
 
-    const orcamentoId = generateUUID()
-
-    await query(insertQuery, [
-      orcamentoId,
-      numero,
+    await query(updateQuery, [
       data.cliente_id,
       data.tipo_servico,
       data.detalhes_servico || null,
@@ -174,10 +134,22 @@ export async function POST(request: NextRequest) {
       data.desconto_mdo_valor || 0,
       data.parcelamento_mdo || 1,
       data.parcelamento_material || 1,
-      data.material_a_vista ? 1 : 0, // Adicionado material_a_vista
+      data.material_a_vista ? 1 : 0,
+      data.custo_deslocamento || 0,
+      data.valor_juros || 0,
+      data.taxa_boleto_mdo || 0,
+      data.taxa_boleto_material || 0,
+      data.valor_imposto_servico || 0,
+      data.valor_imposto_material || 0,
+      data.subtotal_mdo || 0,
+      data.subtotal_material || 0,
+      numero,
     ])
 
-    // Inserir itens
+    // Deletar itens existentes
+    await query("DELETE FROM orcamentos_itens WHERE orcamento_numero = ?", [numero])
+
+    // Inserir novos itens
     if (data.itens && data.itens.length > 0) {
       const insertItensQuery = `
         INSERT INTO orcamentos_itens (
@@ -197,8 +169,10 @@ export async function POST(request: NextRequest) {
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
       `
 
+      const { generateUUID } = await import("@/lib/utils")
+
       for (const item of data.itens) {
-        const itemId = generateUUID()
+        const itemId = item.id || generateUUID()
         await query(insertItensQuery, [
           itemId,
           numero,
@@ -218,11 +192,31 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Orçamento criado com sucesso",
-      data: { id: orcamentoId, numero },
+      message: "Orçamento atualizado com sucesso",
+      data: { numero },
     })
   } catch (error) {
-    console.error("Erro ao criar orçamento:", error)
+    console.error("Erro ao atualizar orçamento:", error)
+    return NextResponse.json({ success: false, message: "Erro interno do servidor" }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: { numero: string } }) {
+  try {
+    const { numero } = params
+
+    // Deletar itens primeiro (por causa da foreign key)
+    await query("DELETE FROM orcamentos_itens WHERE orcamento_numero = ?", [numero])
+
+    // Deletar orçamento
+    await query("DELETE FROM orcamentos WHERE numero = ?", [numero])
+
+    return NextResponse.json({
+      success: true,
+      message: "Orçamento excluído com sucesso",
+    })
+  } catch (error) {
+    console.error("Erro ao excluir orçamento:", error)
     return NextResponse.json({ success: false, message: "Erro interno do servidor" }, { status: 500 })
   }
 }

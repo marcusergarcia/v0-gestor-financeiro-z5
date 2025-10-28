@@ -624,7 +624,7 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
           title: "Sucesso!",
           description: `Orçamento ${orcamento.numero} atualizado com sucesso`,
         })
-        router.push(`/orcamentos/${orcamento.numero}`)
+        router.refresh()
       } else {
         toast({
           title: "Erro",
