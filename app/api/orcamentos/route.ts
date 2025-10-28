@@ -142,8 +142,9 @@ export async function POST(request: NextRequest) {
         desconto_mdo_valor,
         parcelamento_mdo,
         parcelamento_material,
+        material_a_vista,
         created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `
 
     const orcamentoId = generateUUID()
@@ -173,6 +174,7 @@ export async function POST(request: NextRequest) {
       data.desconto_mdo_valor || 0,
       data.parcelamento_mdo || 1,
       data.parcelamento_material || 1,
+      data.material_a_vista ? 1 : 0, // Adicionado material_a_vista
     ])
 
     // Inserir itens
