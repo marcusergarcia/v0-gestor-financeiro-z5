@@ -21,6 +21,7 @@ import {
   FileCheck,
   Search,
   Filter,
+  Wrench,
 } from "lucide-react"
 import Link from "next/link"
 import { formatCurrency, formatDate } from "@/lib/utils"
@@ -179,6 +180,23 @@ export default function OrcamentosPage() {
     return { total, pendentes, enviados, notaFiscal, concluidos, valorTotal }
   }
 
+  const getTipoServicoLabel = (tipo: string) => {
+    const tipos: Record<string, string> = {
+      manutencao: "Manutenção",
+      orcamento: "Orçamento",
+      vistoria_contrato: "Vistoria Contrato",
+      preventiva: "Preventiva",
+      instalacao: "Instalação",
+      outros: "Outros",
+    }
+    return tipos[tipo] || tipo
+  }
+
+  const truncateText = (text: string, maxLength = 15) => {
+    if (!text) return "-"
+    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text
+  }
+
   const filteredOrcamentos = orcamentos.filter((orcamento) => {
     const matchesSearch =
       orcamento.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -321,7 +339,7 @@ export default function OrcamentosPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg bg-gradient-to-br from-indigo-50 to-indigo-100 hover:shadow-xl transition-all duration-300">
+          <Card className="border-0 shadow-lg bg-white rounded-lg overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 lg:pb-2 p-3 lg:p-6">
               <CardTitle className="text-xs lg:text-sm font-medium text-indigo-700">Valor Total</CardTitle>
               <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-indigo-600" />
@@ -365,7 +383,7 @@ export default function OrcamentosPage() {
           </CardContent>
         </Card>
 
-        {/* Tabela */}
+        {/* Tabela Desktop e Cards Mobile */}
         <div className="border-0 shadow-lg bg-white rounded-lg overflow-hidden">
           <div className="bg-gradient-to-r from-purple-500 to-blue-600 text-white px-3 py-2 lg:px-6 lg:py-4">
             <h2 className="text-base lg:text-xl font-semibold">Lista de Orçamentos</h2>
@@ -394,13 +412,14 @@ export default function OrcamentosPage() {
               )}
             </div>
           ) : (
-            <div className="overflow-x-auto -mx-3 lg:mx-0">
-              <div className="inline-block min-w-full align-middle">
+            <>
+              <div className="hidden md:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-gray-50">
                       <TableHead className="font-semibold whitespace-nowrap">Número</TableHead>
                       <TableHead className="font-semibold whitespace-nowrap">Cliente</TableHead>
+                      <TableHead className="font-semibold whitespace-nowrap">Tipo de Serviço</TableHead>
                       <TableHead className="font-semibold whitespace-nowrap">Data</TableHead>
                       <TableHead className="font-semibold whitespace-nowrap">Valor Total</TableHead>
                       <TableHead className="font-semibold whitespace-nowrap">Status</TableHead>
@@ -424,6 +443,12 @@ export default function OrcamentosPage() {
                                 <div className="text-xs text-gray-500">{orcamento.cliente_codigo}</div>
                               )}
                             </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          <div className="flex items-center gap-1" title={getTipoServicoLabel(orcamento.tipo_servico)}>
+                            <Wrench className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                            <span className="text-sm">{truncateText(getTipoServicoLabel(orcamento.tipo_servico))}</span>
                           </div>
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
@@ -479,7 +504,83 @@ export default function OrcamentosPage() {
                   </TableBody>
                 </Table>
               </div>
-            </div>
+
+              <div className="md:hidden p-3 space-y-4">
+                {filteredOrcamentos.map((orcamento) => (
+                  <Card
+                    key={orcamento.id}
+                    className="border-2 border-slate-300 shadow-md hover:shadow-lg transition-shadow overflow-hidden"
+                  >
+                    <CardContent className="p-3">
+                      {/* Header do Card */}
+                      <div className="flex items-start justify-between mb-3 pb-2 border-b-2 border-purple-100">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <FileText className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                            <span className="font-bold text-purple-600 text-sm">Orç. {orcamento.numero}</span>
+                          </div>
+                          <div className="text-xs text-gray-500">{formatDate(orcamento.data_orcamento)}</div>
+                        </div>
+                        <div className="flex-shrink-0">{getStatusBadge(orcamento.situacao)}</div>
+                      </div>
+
+                      {/* Informações */}
+                      <div className="space-y-2 mb-3 text-sm">
+                        <div className="flex items-start gap-2">
+                          <User className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-gray-900 truncate">{orcamento.cliente_nome}</div>
+                            {orcamento.cliente_codigo && (
+                              <div className="text-xs text-gray-500">{orcamento.cliente_codigo}</div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Wrench className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                          <div className="text-gray-600 text-xs">{getTipoServicoLabel(orcamento.tipo_servico)}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+                          <div className="font-semibold text-green-600 text-sm">
+                            {formatCurrency(Number(orcamento.valor_total))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Botões de Ação */}
+                      <div className="grid grid-cols-3 gap-2 pt-3 border-t-2 border-slate-200">
+                        <Link href={`/orcamentos/${orcamento.numero}`} className="w-full">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full h-9 text-xs bg-blue-50 hover:bg-blue-100 border-2 border-blue-300 text-blue-700 font-medium"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Link href={`/orcamentos/${orcamento.numero}/editar`} className="w-full">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full h-9 text-xs bg-green-50 hover:bg-green-100 border-2 border-green-300 text-green-700 font-medium"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full h-9 text-xs bg-red-50 hover:bg-red-100 border-2 border-red-300 text-red-600 font-medium"
+                          onClick={() => handleDelete(orcamento.numero)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
