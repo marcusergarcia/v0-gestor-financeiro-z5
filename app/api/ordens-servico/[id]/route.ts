@@ -1,9 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { query } from "@/lib/db"
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params
+    const { id } = params
 
     console.log("Buscando ordem de serviço com ID:", id)
 
@@ -134,29 +134,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params
+    const { id } = params
     const data = await request.json()
 
     console.log("Atualizando ordem de serviço ID:", id)
     console.log("Dados recebidos:", data)
 
-    // Determinar situação automaticamente baseada nos campos preenchidos
-    let situacaoFinal = data.situacao || "aberta"
-
-    // Se tem hora de saída, está concluída
-    if (data.horario_saida) {
-      situacaoFinal = "concluida"
-    }
-    // Se tem data de execução e hora de entrada, está em andamento
-    else if (data.data_execucao && data.horario_entrada) {
-      situacaoFinal = "em_andamento"
-    }
-    // Senão, permanece aberta
-    else {
-      situacaoFinal = "aberta"
-    }
+    const situacaoFinal = data.situacao || "aberta"
 
     const result = await query(
       `
@@ -217,9 +203,9 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params
+    const { id } = params
 
     console.log("Deletando ordem de serviço ID:", id)
 

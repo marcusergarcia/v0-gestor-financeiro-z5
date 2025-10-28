@@ -516,7 +516,7 @@ export default function VisualizarOrdemServicoPage() {
             </div>
 
             {/* Descrições e Observações */}
-            {ordemServico.descricao_defeito && ordemServico.tipo_servico !== "manutencao" && (
+            {ordemServico.descricao_defeito && ordemServico.tipo_servico !== "preventiva" && (
               <>
                 <Separator className="my-4" />
                 <div>
@@ -531,7 +531,7 @@ export default function VisualizarOrdemServicoPage() {
               </>
             )}
 
-            {ordemServico.necessidades_cliente && (
+            {ordemServico.necessidades_cliente && ordemServico.tipo_servico === "preventiva" && (
               <>
                 <Separator className="my-4" />
                 <div>
@@ -546,7 +546,7 @@ export default function VisualizarOrdemServicoPage() {
               </>
             )}
 
-            {ordemServico.servico_realizado && (
+            {ordemServico.servico_realizado && ordemServico.tipo_servico !== "preventiva" && (
               <>
                 <Separator className="my-4" />
                 <div>
@@ -561,7 +561,7 @@ export default function VisualizarOrdemServicoPage() {
               </>
             )}
 
-            {ordemServico.relatorio_visita && ordemServico.tipo_servico !== "manutencao" && (
+            {ordemServico.relatorio_visita && (
               <>
                 <Separator className="my-4" />
                 <div>
@@ -571,6 +571,21 @@ export default function VisualizarOrdemServicoPage() {
                   </div>
                   <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">
                     {ordemServico.relatorio_visita}
+                  </p>
+                </div>
+              </>
+            )}
+
+            {ordemServico.observacoes && ordemServico.tipo_servico !== "preventiva" && (
+              <>
+                <Separator className="my-4" />
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileText className="h-4 w-4 text-orange-600" />
+                    <span className="font-medium">Observações:</span>
+                  </div>
+                  <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg whitespace-pre-wrap">
+                    {ordemServico.observacoes}
                   </p>
                 </div>
               </>

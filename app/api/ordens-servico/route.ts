@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       FROM ordens_servico os
       LEFT JOIN clientes c ON os.cliente_id = c.id
       ${whereClause}
-      ORDER BY os.created_at DESC
+      ORDER BY os.updated_at DESC
       LIMIT ? OFFSET ?
     `
 
@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
         horario_saida, tipo_servico, relatorio_visita, descricao_defeito, 
         necessidades_cliente, servico_realizado, observacoes, responsavel, 
         nome_responsavel, situacao, created_at, updated_at) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
       [
         numero,
         cliente_id,

@@ -770,7 +770,6 @@ export default function EditarOrdemServicoPage() {
                           <SelectItem value="zelador">Zelador</SelectItem>
                           <SelectItem value="porteiro">Porteiro</SelectItem>
                           <SelectItem value="sindico">Síndico</SelectItem>
-                          <SelectItem value="gerente">Gerente</SelectItem>
                           <SelectItem value="outros">Outros</SelectItem>
                         </SelectContent>
                       </Select>
@@ -874,49 +873,67 @@ export default function EditarOrdemServicoPage() {
               </CardHeader>
               <CardContent className="p-3 md:p-6">
                 <div className="space-y-3 md:space-y-4">
-                  {ordem?.tipo_servico !== "manutencao" && (
+                  <div>
+                    <Label htmlFor="relatorio_visita" className="text-xs md:text-sm">
+                      Relatório da Visita
+                    </Label>
+                    <Textarea
+                      id="relatorio_visita"
+                      value={relatorioVisita}
+                      onChange={(e) => setRelatorioVisita(e.target.value)}
+                      placeholder="Descreva o que foi encontrado durante a visita..."
+                      rows={ordem?.tipo_servico === "preventiva" ? 8 : 5}
+                      className="text-xs md:text-sm"
+                    />
+                  </div>
+
+                  {ordem?.tipo_servico === "preventiva" && (
                     <div>
-                      <Label htmlFor="relatorio_visita" className="text-xs md:text-sm">
-                        Relatório da Visita
+                      <Label htmlFor="observacoes" className="text-xs md:text-sm">
+                        Necessidades do Cliente
                       </Label>
                       <Textarea
-                        id="relatorio_visita"
-                        value={relatorioVisita}
-                        onChange={(e) => setRelatorioVisita(e.target.value)}
-                        placeholder="Descreva o que foi encontrado durante a visita..."
-                        rows={ordem?.tipo_servico === "preventiva" ? 8 : 5}
+                        id="observacoes"
+                        value={observacoes}
+                        onChange={(e) => setObservacoes(e.target.value)}
+                        placeholder="Adicione observações sobre necessidades específicas do cliente..."
+                        rows={4}
                         className="text-xs md:text-sm"
                       />
                     </div>
                   )}
 
-                  <div>
-                    <Label htmlFor="necessidades_cliente" className="text-xs md:text-sm">
-                      Necessidades do Cliente
-                    </Label>
-                    <Textarea
-                      id="necessidades_cliente"
-                      value={observacoes}
-                      onChange={(e) => setObservacoes(e.target.value)}
-                      placeholder="Adicione observações sobre necessidades específicas do cliente..."
-                      rows={4}
-                      className="text-xs md:text-sm"
-                    />
-                  </div>
+                  {ordem?.tipo_servico !== "preventiva" && (
+                    <>
+                      <div>
+                        <Label htmlFor="servico_realizado" className="text-xs md:text-sm">
+                          Serviço Realizado
+                        </Label>
+                        <Textarea
+                          id="servico_realizado"
+                          value={servicoRealizado}
+                          onChange={(e) => setServicoRealizado(e.target.value)}
+                          placeholder="Descreva os serviços que foram realizados..."
+                          rows={6}
+                          className="text-xs md:text-sm"
+                        />
+                      </div>
 
-                  <div>
-                    <Label htmlFor="servico_realizado" className="text-xs md:text-sm">
-                      Serviço Realizado
-                    </Label>
-                    <Textarea
-                      id="servico_realizado"
-                      value={servicoRealizado}
-                      onChange={(e) => setServicoRealizado(e.target.value)}
-                      placeholder="Descreva os serviços que foram realizados..."
-                      rows={6}
-                      className="text-xs md:text-sm"
-                    />
-                  </div>
+                      <div>
+                        <Label htmlFor="observacoes" className="text-xs md:text-sm">
+                          Observações Gerais
+                        </Label>
+                        <Textarea
+                          id="observacoes"
+                          value={observacoes}
+                          onChange={(e) => setObservacoes(e.target.value)}
+                          placeholder="Observações adicionais..."
+                          rows={4}
+                          className="text-xs md:text-sm"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
