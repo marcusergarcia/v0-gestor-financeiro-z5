@@ -115,17 +115,19 @@ export async function POST(request: NextRequest) {
       assinaturas = [],
     } = body
 
-    console.log("Dados recebidos:", {
+    console.log("[v0] Dados recebidos para criar ordem:", {
       numero,
       cliente_id,
       tecnico_name,
       data_atual,
-      data_agendamento,
       tipo_servico,
+      situacao,
+      equipamentos_count: equipamentos.length,
     })
 
     // Validações básicas
     if (!numero || !cliente_id || !tecnico_name || !tipo_servico) {
+      console.log("[v0] Validação falhou: campos obrigatórios faltando")
       return NextResponse.json(
         { success: false, error: "Campos obrigatórios: número, cliente, técnico e tipo de serviço" },
         { status: 400 },
@@ -133,6 +135,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!data_atual && !data_agendamento) {
+      console.log("[v0] Validação falhou: nenhuma data informada")
       return NextResponse.json(
         { success: false, error: "É necessário informar pelo menos uma data (atual ou agendamento)" },
         { status: 400 },
@@ -143,21 +146,21 @@ export async function POST(request: NextRequest) {
     const existingOrder = await query("SELECT id FROM ordens_servico WHERE numero = ?", [numero])
 
     if ((existingOrder as any[]).length > 0) {
+      console.log("[v0] Validação falhou: número já existe")
       return NextResponse.json(
         { success: false, error: "Já existe uma ordem de serviço com este número" },
         { status: 400 },
       )
     }
 
-    // Inserir ordem de serviço
     const insertResult = await query(
       `INSERT INTO ordens_servico 
        (numero, cliente_id, contrato_id, contrato_numero, tecnico_name, tecnico_email, 
         solicitado_por, data_atual, data_agendamento, data_execucao, horario_entrada, 
         horario_saida, tipo_servico, relatorio_visita, descricao_defeito, 
         necessidades_cliente, servico_realizado, observacoes, responsavel, 
-        nome_responsavel, situacao, created_at, updated_at) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        nome_responsavel, situacao) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         numero,
         cliente_id,
@@ -184,14 +187,16 @@ export async function POST(request: NextRequest) {
     )
 
     const ordemId = (insertResult as any).insertId
+    console.log("[v0] Ordem criada com ID:", ordemId)
 
     // Inserir equipamentos
     if (equipamentos && equipamentos.length > 0) {
+      console.log("[v0] Inserindo", equipamentos.length, "equipamentos")
       for (const equipamento of equipamentos) {
         await query(
           `INSERT INTO ordens_servico_itens 
-           (ordem_servico_id, equipamento_id, equipamento_nome, quantidade, observacoes, situacao, created_at, updated_at) 
-           VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+           (ordem_servico_id, equipamento_id, equipamento_nome, quantidade, observacoes, situacao) 
+           VALUES (?, ?, ?, ?, ?, ?)`,
           [
             ordemId,
             equipamento.equipamento_id,
@@ -202,15 +207,17 @@ export async function POST(request: NextRequest) {
           ],
         )
       }
+      console.log("[v0] Equipamentos inseridos com sucesso")
     }
 
     // Inserir fotos
     if (fotos && fotos.length > 0) {
+      console.log("[v0] Inserindo", fotos.length, "fotos")
       for (const foto of fotos) {
         await query(
           `INSERT INTO ordens_servico_fotos 
-           (ordem_servico_id, nome_arquivo, caminho_arquivo, tipo_foto, descricao, created_at) 
-           VALUES (?, ?, ?, ?, ?, NOW())`,
+           (ordem_servico_id, nome_arquivo, caminho_arquivo, tipo_foto, descricao) 
+           VALUES (?, ?, ?, ?, ?)`,
           [ordemId, foto.nome_arquivo, foto.caminho_arquivo, foto.tipo_foto, foto.descricao || null],
         )
       }
@@ -218,6 +225,7 @@ export async function POST(request: NextRequest) {
 
     // Inserir assinaturas
     if (assinaturas && assinaturas.length > 0) {
+      console.log("[v0] Inserindo", assinaturas.length, "assinaturas")
       for (const assinatura of assinaturas) {
         await query(
           `INSERT INTO ordens_servico_assinaturas 
@@ -228,13 +236,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    console.log("[v0] Ordem de serviço criada com sucesso:", { id: ordemId, numero })
+
     return NextResponse.json({
       success: true,
       message: "Ordem de serviço criada com sucesso",
       data: { id: ordemId, numero },
     })
   } catch (error) {
-    console.error("Erro ao criar ordem de serviço:", error)
-    return NextResponse.json({ success: false, error: "Erro interno do servidor" }, { status: 500 })
+    console.error("[v0] Erro ao criar ordem de serviço:", error)
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Erro interno do servidor",
+        details: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    )
   }
 }

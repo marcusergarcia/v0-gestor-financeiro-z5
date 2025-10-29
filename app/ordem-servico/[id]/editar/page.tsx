@@ -873,37 +873,8 @@ export default function EditarOrdemServicoPage() {
               </CardHeader>
               <CardContent className="p-3 md:p-6">
                 <div className="space-y-3 md:space-y-4">
-                  <div>
-                    <Label htmlFor="relatorio_visita" className="text-xs md:text-sm">
-                      Relatório da Visita
-                    </Label>
-                    <Textarea
-                      id="relatorio_visita"
-                      value={relatorioVisita}
-                      onChange={(e) => setRelatorioVisita(e.target.value)}
-                      placeholder="Descreva o que foi encontrado durante a visita..."
-                      rows={ordem?.tipo_servico === "preventiva" ? 8 : 5}
-                      className="text-xs md:text-sm"
-                    />
-                  </div>
-
-                  {ordem?.tipo_servico === "preventiva" && (
-                    <div>
-                      <Label htmlFor="observacoes" className="text-xs md:text-sm">
-                        Necessidades do Cliente
-                      </Label>
-                      <Textarea
-                        id="observacoes"
-                        value={observacoes}
-                        onChange={(e) => setObservacoes(e.target.value)}
-                        placeholder="Adicione observações sobre necessidades específicas do cliente..."
-                        rows={4}
-                        className="text-xs md:text-sm"
-                      />
-                    </div>
-                  )}
-
-                  {ordem?.tipo_servico !== "preventiva" && (
+                  {/* Manutenção: apenas Serviço Realizado e Observações Gerais */}
+                  {ordem?.tipo_servico === "manutencao" && (
                     <>
                       <div>
                         <Label htmlFor="servico_realizado" className="text-xs md:text-sm">
@@ -913,7 +884,7 @@ export default function EditarOrdemServicoPage() {
                           id="servico_realizado"
                           value={servicoRealizado}
                           onChange={(e) => setServicoRealizado(e.target.value)}
-                          placeholder="Descreva os serviços que foram realizados..."
+                          placeholder="Descreva os serviços de manutenção que foram realizados..."
                           rows={6}
                           className="text-xs md:text-sm"
                         />
@@ -934,6 +905,155 @@ export default function EditarOrdemServicoPage() {
                       </div>
                     </>
                   )}
+
+                  {/* Preventiva: Relatório da Visita e Necessidades do Cliente */}
+                  {ordem?.tipo_servico === "preventiva" && (
+                    <>
+                      <div>
+                        <Label htmlFor="relatorio_visita" className="text-xs md:text-sm">
+                          Relatório da Visita
+                        </Label>
+                        <Textarea
+                          id="relatorio_visita"
+                          value={relatorioVisita}
+                          onChange={(e) => setRelatorioVisita(e.target.value)}
+                          placeholder="Descreva o que foi encontrado durante a visita..."
+                          rows={8}
+                          className="text-xs md:text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="observacoes" className="text-xs md:text-sm">
+                          Necessidades do Cliente
+                        </Label>
+                        <Textarea
+                          id="observacoes"
+                          value={observacoes}
+                          onChange={(e) => setObservacoes(e.target.value)}
+                          placeholder="Adicione observações sobre necessidades específicas do cliente..."
+                          rows={4}
+                          className="text-xs md:text-sm"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Vistoria para Contrato: Relatório da Visita e Observações da Vistoria */}
+                  {ordem?.tipo_servico === "vistoria_contrato" && (
+                    <>
+                      <div>
+                        <Label htmlFor="relatorio_visita" className="text-xs md:text-sm">
+                          Relatório da Visita
+                        </Label>
+                        <Textarea
+                          id="relatorio_visita"
+                          value={relatorioVisita}
+                          onChange={(e) => setRelatorioVisita(e.target.value)}
+                          placeholder="Descreva o que foi encontrado durante a vistoria..."
+                          rows={6}
+                          className="text-xs md:text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="observacoes" className="text-xs md:text-sm">
+                          Observações da Vistoria
+                        </Label>
+                        <Textarea
+                          id="observacoes"
+                          value={observacoes}
+                          onChange={(e) => setObservacoes(e.target.value)}
+                          placeholder="Adicione observações sobre a vistoria do contrato..."
+                          rows={4}
+                          className="text-xs md:text-sm"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Orçamento: Relatório da Visita e Observações Gerais (sem Serviço Realizado) */}
+                  {ordem?.tipo_servico === "orcamento" && (
+                    <>
+                      <div>
+                        <Label htmlFor="relatorio_visita" className="text-xs md:text-sm">
+                          Relatório da Visita
+                        </Label>
+                        <Textarea
+                          id="relatorio_visita"
+                          value={relatorioVisita}
+                          onChange={(e) => setRelatorioVisita(e.target.value)}
+                          placeholder="Descreva o que foi encontrado durante a visita de orçamento..."
+                          rows={6}
+                          className="text-xs md:text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="observacoes" className="text-xs md:text-sm">
+                          Observações Gerais
+                        </Label>
+                        <Textarea
+                          id="observacoes"
+                          value={observacoes}
+                          onChange={(e) => setObservacoes(e.target.value)}
+                          placeholder="Observações sobre o orçamento..."
+                          rows={4}
+                          className="text-xs md:text-sm"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Outros tipos: Relatório, Serviço Realizado e Observações */}
+                  {ordem?.tipo_servico !== "manutencao" &&
+                    ordem?.tipo_servico !== "preventiva" &&
+                    ordem?.tipo_servico !== "vistoria_contrato" &&
+                    ordem?.tipo_servico !== "orcamento" && (
+                      <>
+                        <div>
+                          <Label htmlFor="relatorio_visita" className="text-xs md:text-sm">
+                            Relatório da Visita
+                          </Label>
+                          <Textarea
+                            id="relatorio_visita"
+                            value={relatorioVisita}
+                            onChange={(e) => setRelatorioVisita(e.target.value)}
+                            placeholder="Descreva o que foi encontrado durante a visita..."
+                            rows={5}
+                            className="text-xs md:text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="servico_realizado" className="text-xs md:text-sm">
+                            Serviço Realizado
+                          </Label>
+                          <Textarea
+                            id="servico_realizado"
+                            value={servicoRealizado}
+                            onChange={(e) => setServicoRealizado(e.target.value)}
+                            placeholder="Descreva os serviços que foram realizados..."
+                            rows={6}
+                            className="text-xs md:text-sm"
+                          />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="observacoes" className="text-xs md:text-sm">
+                            Observações Gerais
+                          </Label>
+                          <Textarea
+                            id="observacoes"
+                            value={observacoes}
+                            onChange={(e) => setObservacoes(e.target.value)}
+                            placeholder="Observações adicionais..."
+                            rows={4}
+                            className="text-xs md:text-sm"
+                          />
+                        </div>
+                      </>
+                    )}
                 </div>
               </CardContent>
             </Card>
