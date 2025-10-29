@@ -19,11 +19,11 @@ export async function GET(request: NextRequest, { params }: { params: { numero: 
         c.cep as cliente_cep,
         c.email as cliente_email,
         c.telefone as cliente_telefone,
-        c.distancia_km as cliente_distancia_km,
-        c.nome_adm as cliente_nome_adm,
-        c.contato_adm as cliente_contato_adm,
-        c.telefone_adm as cliente_telefone_adm,
-        c.email_adm as cliente_email_adm
+        c.distancia_km,
+        c.nome_adm,
+        c.contato_adm,
+        c.telefone_adm,
+        c.email_adm
       FROM orcamentos o
       LEFT JOIN clientes c ON o.cliente_id = c.id
       WHERE o.numero = ?
@@ -35,9 +35,29 @@ export async function GET(request: NextRequest, { params }: { params: { numero: 
       return NextResponse.json({ success: false, message: "Orçamento não encontrado" }, { status: 404 })
     }
 
+    const orcamento = orcamentos[0]
+
+    const itensQuery = `
+      SELECT 
+        oi.*,
+        p.codigo as produto_codigo,
+        p.descricao as produto_descricao,
+        p.unidade as produto_unidade,
+        p.ncm as produto_ncm
+      FROM orcamentos_itens oi
+      LEFT JOIN produtos p ON oi.produto_id = p.id
+      WHERE oi.orcamento_numero = ?
+      ORDER BY oi.created_at
+    `
+
+    const itens = await query(itensQuery, [numero])
+
     return NextResponse.json({
       success: true,
-      data: orcamentos[0],
+      data: {
+        ...orcamento,
+        itens: itens || [],
+      },
     })
   } catch (error) {
     console.error("Erro ao buscar orçamento:", error)
