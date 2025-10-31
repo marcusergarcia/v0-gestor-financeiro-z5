@@ -311,6 +311,13 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
 
   const calcularSubtotalMdo = () => {
     if (!orcamento) return 0
+
+    // Se parcelamento MDO for 0 (sem cobrança), subtotal MDO é 0
+    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
+    if (parcelamentoMdo === 0) {
+      return 0
+    }
+
     const valorMaoObra = safeNumber(orcamento.valor_mao_obra)
     const descontoMdoValor = safeNumber(orcamento.desconto_mdo_valor)
     const custoDeslocamento = calcularCustoDeslocamento()
@@ -327,7 +334,10 @@ export default function VisualizarOrcamentoPage({ params }: { params: Promise<{ 
     const taxaBoletoMaterial = calcularTaxaBoletoMaterial()
     const impostoMaterialValor = calcularImpostoMaterialValor()
 
-    return valorMaterial + valorJuros + taxaBoletoMaterial + impostoMaterialValor
+    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
+    const custoDeslocamentoExtra = parcelamentoMdo === 0 ? calcularCustoDeslocamento() : 0
+
+    return valorMaterial + valorJuros + taxaBoletoMaterial + impostoMaterialValor + custoDeslocamentoExtra
   }
 
   const calcularDataValidade = () => {

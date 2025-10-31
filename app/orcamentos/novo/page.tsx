@@ -429,6 +429,36 @@ export default function NovoOrcamentoPage() {
     return distanciaKm * 2 * valorPorKm * prazoDias
   }
 
+  const calcularSubtotalMdo = () => {
+    // Se parcelamento MDO for 0 (sem cobrança), subtotal MDO é 0
+    if (parcelamentoMdo === 0) {
+      return 0
+    }
+
+    // Caso contrário, calcula normally com custo de deslocamento
+    return (
+      calcularValorMaoObra() -
+      calcularDescontoMdoValor() +
+      calcularCustoDeslocamento() +
+      calcularTaxaBoletoMdo() +
+      calcularImpostoServicoValor()
+    )
+  }
+
+  const calcularSubtotalMaterial = () => {
+    if (parcelamentoMaterial === 0 && !materialAVista) return 0
+
+    const custoDeslocamentoExtra = parcelamentoMdo === 0 ? calcularCustoDeslocamento() : 0
+
+    return (
+      calcularValorMaterial() +
+      calcularValorJuros() +
+      calcularTaxaBoletoMaterial() +
+      calcularImpostoMaterialValor() +
+      custoDeslocamentoExtra
+    )
+  }
+
   const calcularValorJuros = () => {
     if (materialAVista || parcelamentoMaterial === 0) return 0
     return ((parcelamentoMdo + parcelamentoMaterial - 1) * jurosAm * calcularValorMaterial()) / 100
@@ -460,22 +490,22 @@ export default function NovoOrcamentoPage() {
     return (base * impostoMaterial) / 100
   }
 
-  const calcularSubtotalMdo = () => {
-    return (
-      calcularValorMaoObra() -
-      calcularDescontoMdoValor() +
-      calcularCustoDeslocamento() +
-      calcularTaxaBoletoMdo() +
-      calcularImpostoServicoValor()
-    )
-  }
+  // const calcularSubtotalMdo = () => {
+  //   return (
+  //     calcularValorMaoObra() -
+  //     calcularDescontoMdoValor() +
+  //     calcularCustoDeslocamento() +
+  //     calcularTaxaBoletoMdo() +
+  //     calcularImpostoServicoValor()
+  //   )
+  // }
 
-  const calcularSubtotalMaterial = () => {
-    if (parcelamentoMaterial === 0 && !materialAVista) return 0
-    return (
-      calcularValorMaterial() + calcularValorJuros() + calcularTaxaBoletoMaterial() + calcularImpostoMaterialValor()
-    )
-  }
+  // const calcularSubtotalMaterial = () => {
+  //   if (parcelamentoMaterial === 0 && !materialAVista) return 0
+  //   return (
+  //     calcularValorMaterial() + calcularValorJuros() + calcularTaxaBoletoMaterial() + calcularImpostoMaterialValor()
+  //   )
+  // }
 
   const calcularTotal = () => {
     return calcularSubtotalMdo() + calcularSubtotalMaterial() - desconto

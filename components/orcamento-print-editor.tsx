@@ -185,6 +185,11 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
       return safeNumber(orcamento.subtotal_mdo)
     }
 
+    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
+    if (parcelamentoMdo === 0) {
+      return 0
+    }
+
     const valorMaoObra = safeNumber(orcamento.valor_mao_obra)
     const descontoMdoValor = safeNumber(orcamento.desconto_mdo_valor)
     const custoDeslocamento = safeNumber(orcamento.custo_deslocamento)
@@ -206,7 +211,10 @@ export function OrcamentoPrintEditor({ orcamento, onClose }: OrcamentoPrintEdito
     const taxaBoletoMaterial = safeNumber(orcamento.taxa_boleto_material)
     const impostoMaterialValor = safeNumber(orcamento.imposto_material)
 
-    return valorMaterial + valorJuros + taxaBoletoMaterial + impostoMaterialValor
+    const parcelamentoMdo = safeNumber(orcamento.parcelamento_mdo) || 1
+    const custoDeslocamentoExtra = parcelamentoMdo === 0 ? safeNumber(orcamento.custo_deslocamento) : 0
+
+    return valorMaterial + valorJuros + taxaBoletoMaterial + impostoMaterialValor + custoDeslocamentoExtra
   }
 
   const gerarTextoParcelamento = () => {

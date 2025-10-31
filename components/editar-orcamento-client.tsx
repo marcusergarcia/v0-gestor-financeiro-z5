@@ -438,6 +438,12 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
   }
 
   const calcularSubtotalMdo = () => {
+    // Se parcelamento MDO for 0 (sem cobrança), subtotal MDO é 0
+    if (parcelamentoMdo === 0) {
+      return 0
+    }
+
+    // Caso contrário, calcula normalmente com custo de deslocamento
     return (
       calcularValorMaoObra() -
       calcularDescontoMdoValor() +
@@ -449,8 +455,15 @@ export function EditarOrcamentoClient({ orcamento, itensIniciais }: EditarOrcame
 
   const calcularSubtotalMaterial = () => {
     if (parcelamentoMaterial === 0) return 0
+
+    const custoDeslocamentoExtra = parcelamentoMdo === 0 ? calcularCustoDeslocamento() : 0
+
     return (
-      calcularValorMaterial() + calcularValorJuros() + calcularTaxaBoletoMaterial() + calcularImpostoMaterialValor()
+      calcularValorMaterial() +
+      calcularValorJuros() +
+      calcularTaxaBoletoMaterial() +
+      calcularImpostoMaterialValor() +
+      custoDeslocamentoExtra
     )
   }
 
